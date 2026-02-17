@@ -32,6 +32,7 @@ from wpimath.controller import (
 
 from constants import AutoConstants, DriveConstants, OIConstants
 from subsystems.drivesubsystem import DriveSubsystem
+from subsystems.shootersubsystem import ShooterSubsystem
 
 
 class RobotContainer:
@@ -45,10 +46,11 @@ class RobotContainer:
     def __init__(self) -> None:
         # The robot's subsystems
         self.robotDrive = DriveSubsystem()
-
+        self.Shooter = ShooterSubsystem()
         # The driver's controller
         # Using commands2 instead of wpilib
         #self.driverController = wpilib.XboxController(OIConstants.kDriverControllerPort)
+        self.distance = 50
 
         # The driver's controller
         self.driverController = commands2.button.CommandXboxController(
@@ -87,24 +89,38 @@ class RobotContainer:
         instantiating a :GenericHID or one of its subclasses (Joystick or XboxController),
         and then passing it to a JoystickButton.
         """
-        self.shooter = SparkMax(AuxConstants.Shooter_ID, SparkMax.MotorType.kBrushless)
-        self.driverController.rightBumper().onTrue(cmd.runOnce(lambda:self.shooter.set(-0.5)))
-        self.driverController.rightBumper().onFalse(cmd.runOnce(lambda:self.shooter.set(0)))
+        def distanceplus():
+            self.distance = round(self.distance + 1)
+            print("Distance: " +str(self.distance) + "in")
+
+        def distanceminus():
+            self.distance = round(self.distance - 1)
+            print("Distance: " +str(self.distance) + "in")
+
+
+        self.driverController.y().onTrue(cmd.runOnce(lambda:distanceplus()))
+        self.driverController.x().onTrue(cmd.runOnce(lambda:distanceminus()))
+
+        self.driverController.rightBumper().onTrue(cmd.runOnce(lambda: self.Shooter.set_speed(self.Shooter.fire(self.distance))))
+        self.driverController.rightBumper().onFalse(cmd.runOnce(lambda: self.Shooter.stop()))
+        #self.shooter = SparkMax(AuxConstants.Shooter_ID, SparkMax.MotorType.kBrushless)
+        #self.driverController.rightBumper().onTrue(cmd.runOnce(lambda:self.shooter.set(-0.5)))
+        #self.driverController.rightBumper().onFalse(cmd.runOnce(lambda:self.shooter.set()))
 
         self.intake = SparkMax(AuxConstants.Intake_ID, SparkMax.MotorType.kBrushed)
-        self.driverController.leftBumper().onTrue(cmd.runOnce(lambda:self.intake.set(0.5)))
+        self.driverController.leftBumper().onTrue(cmd.runOnce(lambda:self.intake.set(1)))
         self.driverController.leftBumper().onFalse(cmd.runOnce(lambda:self.intake.set(0)))
 
-        self.lift = SparkMax(AuxConstants.Lift_ID, SparkMax.MotorType.kBrushed)
-        self.driverController.x().onTrue(cmd.runOnce(lambda:self.lift.set(.2)))
-        self.driverController.x().onTrue(cmd.runOnce(lambda:self.lift.set(0)))
-        self.driverController.y().onTrue(cmd.runOnce(lambda:self.lift.set(-.2)))
-        self.driverController.y().onTrue(cmd.runOnce(lambda:self.lift.set(0)))
+        #self.lift = SparkMax(AuxConstants.Lift_ID, SparkMax.MotorType.kBrushed)
+        #self.driverController.x().onTrue(cmd.runOnce(lambda:self.lift.set(1)))
+        #self.driverController.x().onTrue(cmd.runOnce(lambda:self.lift.set(0)))
+        #self.driverController.y().onTrue(cmd.runOnce(lambda:self.lift.set(-1)))
+        #self.driverController.y().onTrue(cmd.runOnce(lambda:self.lift.set(0)))
 
         self.climb = SparkMax(AuxConstants.Climb_ID, SparkMax.MotorType.kBrushless)
-        self.driverController.a().onTrue(cmd.runOnce(lambda:self.climb.set(0.5)))
+        self.driverController.a().onTrue(cmd.runOnce(lambda:self.climb.set(1)))
         self.driverController.a().onFalse(cmd.runOnce(lambda:self.climb.set(0)))
-        self.driverController.b().onTrue(cmd.runOnce(lambda:self.climb.set(-0.5)))
+        self.driverController.b().onTrue(cmd.runOnce(lambda:self.climb.set(-1)))
         self.driverController.b().onFalse(cmd.runOnce(lambda:self.climb.set(0)))
 
     def disablePIDSubsystems(self) -> None:
@@ -129,12 +145,17 @@ class RobotContainer:
             # Start at the origin facing the +X direction
             Pose2d(0, 0, Rotation2d(0)),
             # Pass through these two interior waypoints, making an 's' curve path
-            [Translation2d(1, 1), Translation2d(2, -1)],
+            [Translation2d(.1, .1), Translation2d(.2, -.1)],
             # End 3 meters straight ahead of where we started, facing forward
-            Pose2d(3, 0, Rotation2d(0)),
+            Pose2d(.3, 0, Rotation2d(0)),
             config,
         )
-
+        def Shoot_5sec() :
+            self.Shooter.set_speed(-.5)
+            commands2.WaitCommand(5.0)
+            self.Shooter.stop()
+        
+        Shoot_5sec()
         # Constraint for the motion profiled robot angle controller
         kThetaControllerConstraints = TrapezoidProfileRadians.Constraints(
             AutoConstants.kMaxAngularSpeedRadiansPerSecond,
@@ -163,6 +184,7 @@ class RobotContainer:
             (self.robotDrive,),
         )
 
+        
         # Reset odometry to the starting pose of the trajectory.
         self.robotDrive.resetOdometry(exampleTrajectory.initialPose())
 
