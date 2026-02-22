@@ -7,7 +7,8 @@
 import math
 import typing
 
-import wpilib
+import wpilib 
+import navx
 
 from commands2 import Subsystem
 from wpimath.filter import SlewRateLimiter
@@ -54,7 +55,7 @@ class DriveSubsystem(Subsystem):
         )
 
         # The gyro sensor
-        self.gyro = wpilib.ADIS16448_IMU()
+        self.gyro = navx.AHRS.create_spi()
 
         # Print absolute encoder positions for all modules at startup
         print("FL abs encoder:", self.frontLeft.turningEncoder.getPosition())

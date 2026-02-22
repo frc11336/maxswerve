@@ -104,8 +104,7 @@ class RobotContainer:
             # if you want your robot to slowly chase that object... replace this line above with: self.robotDrive.arcadeDrive(0.1, turn_speed)
 
             self.driverController.start().whileTrue(cmd.run(lambda:turn_to_object()))
-            self.driverController.start().whileFalse(cmd.run(lambda: self.robotDrive.drive(0, 0, 0, False, False)))
-
+           
         def distanceplus():
             self.distance = round(self.distance + 1)
             print("")
