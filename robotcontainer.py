@@ -33,7 +33,8 @@ from wpimath.controller import (
 from constants import AutoConstants, DriveConstants, OIConstants
 from subsystems.drivesubsystem import DriveSubsystem
 from subsystems.shootersubsystem import ShooterSubsystem
-
+from commands.ShooterCommands import shootercommands
+from subsystems.limelight_camera import LimelightCamera
 
 class RobotContainer:
     """
@@ -45,12 +46,17 @@ class RobotContainer:
 
     def __init__(self) -> None:
         # The robot's subsystems
+
+        
+        self.camera = LimelightCamera("limelight-pickup")  # name of your camera goes in parentheses
+
         self.robotDrive = DriveSubsystem()
         self.Shooter = ShooterSubsystem()
+        self.ShooterCommands = shootercommands()
         # The driver's controller
         # Using commands2 instead of wpilib
         #self.driverController = wpilib.XboxController(OIConstants.kDriverControllerPort)
-        self.distance = 50
+        self.distance = 100
 
         # The driver's controller
         self.driverController = commands2.button.CommandXboxController(
@@ -89,19 +95,47 @@ class RobotContainer:
         instantiating a :GenericHID or one of its subclasses (Joystick or XboxController),
         and then passing it to a JoystickButton.
         """
+
+        def turn_to_object():
+            x = self.camera.getX()
+            print(f"x={x}")
+            turn_speed = -0.005 * x
+            self.robotDrive.drive(0, 0, turn_speed, False, False)
+            # if you want your robot to slowly chase that object... replace this line above with: self.robotDrive.arcadeDrive(0.1, turn_speed)
+
+            self.driverController.start().whileTrue(cmd.run(lambda:turn_to_object()))
+            self.driverController.start().whileFalse(cmd.run(lambda: self.robotDrive.drive(0, 0, 0, False, False)))
+
         def distanceplus():
             self.distance = round(self.distance + 1)
-            print("Distance: " +str(self.distance) + "in")
+            print("")
+            print("")
+            print("")
+            print("")
+            print("")
+            print("")
+            print("")
+            print("Distance:" + str(self.distance) + "in" )
+            print("_" * round(self.distance/10))
 
         def distanceminus():
             self.distance = round(self.distance - 1)
-            print("Distance: " +str(self.distance) + "in")
+            print("") 
+            print("")
+            print("")
+            print("")
+            print("")
+            print("")
+            print("")
+            print("")
+            print("Distance:" + str(self.distance) + "in" )
+            print("_" * round(self.distance/10))
 
 
-        self.driverController.y().onTrue(cmd.runOnce(lambda:distanceplus()))
-        self.driverController.x().onTrue(cmd.runOnce(lambda:distanceminus()))
+        self.driverController.y().whileTrue(cmd.runOnce(lambda:distanceplus()))
+        self.driverController.x().whileTrue(cmd.runOnce(lambda:distanceminus()))
 
-        self.driverController.rightBumper().onTrue(cmd.runOnce(lambda: self.Shooter.set_speed(self.Shooter.fire(self.distance))))
+        self.driverController.rightBumper().onTrue(cmd.runOnce(lambda:self.ShooterCommands.fire(self.distance)))
         self.driverController.rightBumper().onFalse(cmd.runOnce(lambda: self.Shooter.stop()))
         #self.shooter = SparkMax(AuxConstants.Shooter_ID, SparkMax.MotorType.kBrushless)
         #self.driverController.rightBumper().onTrue(cmd.runOnce(lambda:self.shooter.set(-0.5)))

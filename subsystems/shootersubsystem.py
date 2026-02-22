@@ -20,9 +20,7 @@ class ShooterSubsystem(commands2.Subsystem):
     def stop(self):
         self.motor.set(0)
 
-    def fire(self, distance):
-        x = (-0.0000037 * (distance ^ 2)) + (0.0025 * distance) + 0.736
-        self.motor.set(-x)
+
     
 
             
