@@ -134,11 +134,9 @@ class RobotContainer:
         self.driverController.y().whileTrue(cmd.runOnce(lambda:distanceplus()))
         self.driverController.x().whileTrue(cmd.runOnce(lambda:distanceminus()))
 
-        self.driverController.rightBumper().onTrue(cmd.runOnce(lambda:self.ShooterCommands.fire(self.distance)))
+        self.driverController.rightBumper().onTrue(cmd.runOnce(lambda:self.Shooter.set_speed(80)))
         self.driverController.rightBumper().onFalse(cmd.runOnce(lambda: self.Shooter.stop()))
-        #self.shooter = SparkMax(AuxConstants.Shooter_ID, SparkMax.MotorType.kBrushless)
-        #self.driverController.rightBumper().onTrue(cmd.runOnce(lambda:self.shooter.set(-0.5)))
-        #self.driverController.rightBumper().onFalse(cmd.runOnce(lambda:self.shooter.set()))
+
 
         self.intake = SparkMax(AuxConstants.Intake_ID, SparkMax.MotorType.kBrushed)
         self.driverController.leftBumper().onTrue(cmd.runOnce(lambda:self.intake.set(1)))
