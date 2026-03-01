@@ -8,12 +8,17 @@ import math
 import typing
 import navx
 
+from rev import PersistMode, ResetMode, SparkBase, SparkBaseConfig, SparkMax, SparkMaxConfig
+
 import wpilib
 from wpilib import SPI
+
+import wpimath.controller
 
 from commands2 import Subsystem
 from wpimath.filter import SlewRateLimiter
 from wpimath.geometry import Pose2d, Rotation2d
+import wpimath.kinematics
 from wpimath.kinematics import (
     ChassisSpeeds,
     SwerveModuleState,
@@ -54,6 +59,7 @@ class DriveSubsystem(Subsystem):
             DriveConstants.kRearRightTurningCanId,
             DriveConstants.kBackRightChassisAngularOffset,
         )
+
 
         # The gyro sensor
         self.gyro = navx.AHRS.create_spi()
