@@ -13,7 +13,6 @@ class ShooterSubsystem(commands2.Subsystem):
         # Initialize NEO motor
         self.motor_1 = SparkMax(AuxConstants.Shooter_ID_1, type=SparkMax.MotorType.kBrushless)
         self.motor_2 = SparkMax(AuxConstants.Shooter_ID_2, type=SparkMax.MotorType.kBrushless)
-
         self.feeder = SparkMax(AuxConstants.Feeder_ID, type=SparkMax.MotorType.kBrushed)
 
     def Shooter_set_speed(self, speed):
