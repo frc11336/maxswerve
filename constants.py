@@ -133,8 +133,9 @@ class AutoConstants:
     kMaxAngularSpeedRadiansPerSecondSquared = math.pi
 
 class AuxConstants:
-    Lift_ID = 18
-    Intake_ID = 17
+    Intake_ID = 12
     Climb_ID = 15
-    Shooter_ID = 19
+    Shooter_ID_1 = 13
+    Shooter_ID_2 = 19
+    Feeder_ID = 10
 
