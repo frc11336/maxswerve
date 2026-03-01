@@ -26,7 +26,7 @@ class NeoMotorConstants:
 class DriveConstants:
     # Driving Parameters - Note that these are not the maximum capable speeds of
     # the robot, rather the allowed maximum speeds
-    kMaxSpeedMetersPerSecond = 4.8
+    kMaxSpeedMetersPerSecond = 8
     kMaxAngularSpeed = math.tau  # radians per second
 
 
@@ -52,21 +52,21 @@ class DriveConstants:
     kDriveKinematics = SwerveDrive4Kinematics(*kModulePositions)
 
     # Angular offsets of the modules relative to the chassis in radians
-    kFrontLeftChassisAngularOffset = -math.pi / 2
-    kFrontRightChassisAngularOffset = 0
+    kFrontLeftChassisAngularOffset = math.pi
+    kFrontRightChassisAngularOffset = math.pi
     kBackLeftChassisAngularOffset = math.pi
-    kBackRightChassisAngularOffset = math.pi / 2
+    kBackRightChassisAngularOffset = math.pi
 
     # SPARK MAX CAN IDs
-    kFrontLeftDrivingCanId = 4
-    kRearLeftDrivingCanId = 8
+    kFrontLeftDrivingCanId = 6
+    kRearLeftDrivingCanId = 4
     kFrontRightDrivingCanId = 2
-    kRearRightDrivingCanId = 6
+    kRearRightDrivingCanId = 8
 
-    kFrontLeftTurningCanId = 5
-    kRearLeftTurningCanId = 9
+    kFrontLeftTurningCanId = 7
+    kRearLeftTurningCanId = 5
     kFrontRightTurningCanId = 3
-    kRearRightTurningCanId = 7
+    kRearRightTurningCanId = 9
 
     kGyroReversed = False
 

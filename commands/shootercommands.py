@@ -22,4 +22,8 @@ class ShooterCommands(commands2.Subsystem):
         self.shooter.Shooter_set_speed(speed)
         time.sleep(.5)
         self.shooter.Feeder_set_speed(1)
-        
+    
+    def fire_Power(self, Power):
+        self.shooter.Shooter_set_speed(Power)
+        time.sleep(.5)
+        self.shooter.Feeder_set_speed(1)

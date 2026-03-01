@@ -58,6 +58,8 @@ class RobotContainer:
         self.distance = 50
         self.power = 0.75
 
+        self.relative = False
+
         # The driver's controller
         self.driverController = commands2.button.CommandXboxController(
             #OperatorConstants.DRIVER_CONTROLLER_PORT : Directly defining port
@@ -82,8 +84,8 @@ class RobotContainer:
                     -wpimath.applyDeadband(
                         self.driverController.getRightX(), OIConstants.kDriveDeadband
                     ),
-                    True,
-                    True,
+                    self.relative,
+                    False,
                 ),
                 self.robotDrive,
             )
@@ -95,6 +97,11 @@ class RobotContainer:
         instantiating a :GenericHID or one of its subclasses (Joystick or XboxController),
         and then passing it to a JoystickButton.
         """
+        def swaprelative():
+            self.relative = not self.relative
+
+        self.driverController.start().onTrue(cmd.runOnce(lambda: swaprelative()))
+
         def distanceplus():
             self.distance = round(self.distance + 1)
             print("Distance: " +str(self.distance) + "in")
@@ -111,14 +118,14 @@ class RobotContainer:
             self.power = round(self.power - 0.05, 2)
             print("Power: " +str(self.power))
 
-        self.driverController.y().onTrue(cmd.runOnce(lambda:distanceplus()))
-        self.driverController.x().onTrue(cmd.runOnce(lambda:distanceminus()))
+        #self.driverController.y().onTrue(cmd.runOnce(lambda:distanceplus()))
+        #self.driverController.x().onTrue(cmd.runOnce(lambda:distanceminus()))
         
-        #self.driverController.y().onTrue(cmd.runOnce(lambda:powerplus()))
-        #self.driverController.x().onTrue(cmd.runOnce(lambda:powerminus()))
+        self.driverController.y().onTrue(cmd.runOnce(lambda:powerplus()))
+        self.driverController.x().onTrue(cmd.runOnce(lambda:powerminus()))
 
-
-        self.driverController.rightBumper().onTrue(cmd.runOnce(lambda: self.ShooterCommands.fire(self.distance)))
+        self.driverController.rightBumper().onTrue(cmd.runOnce(lambda: self.ShooterCommands.fire_Power(self.power)))
+        #self.driverController.rightBumper().onTrue(cmd.runOnce(lambda: self.ShooterCommands.fire(self.distance)))
         self.driverController.rightBumper().onFalse(cmd.runOnce(lambda: self.Shooter.Shooter_stop()))
         self.driverController.rightBumper().onFalse(cmd.runOnce(lambda: self.Shooter.Feeder_stop()))
         #self.shooter = SparkMax(AuxConstants.Shooter_ID, SparkMax.MotorType.kBrushless)
@@ -126,7 +133,7 @@ class RobotContainer:
         #self.driverController.rightBumper().onFalse(cmd.runOnce(lambda:self.shooter.set()))
 
  
-        self.driverController.leftBumper().onTrue(cmd.runOnce(lambda:self.Intake.Intake_set_speed(1)))
+        self.driverController.leftBumper().onTrue(cmd.runOnce(lambda:self.Intake.Intake_set_speed(.75)))
         self.driverController.leftBumper().onFalse(cmd.runOnce(lambda:self.Intake.Intake_stop()))
 
         #self.lift = SparkMax(AuxConstants.Lift_ID, SparkMax.MotorType.kBrushed)
