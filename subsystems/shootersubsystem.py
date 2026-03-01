@@ -11,23 +11,25 @@ class ShooterSubsystem(commands2.Subsystem):
     def __init__(self):
         super().__init__()
         # Initialize NEO motor
-        self.motor1 = SparkMax(AuxConstants.Shooter_ID_1, type=SparkMax.MotorType.kBrushless)
-        self.motor2 = SparkMax(AuxConstants.Shooter_ID_2, type=SparkMax.MotorType.kBrushless)
-        self.motor1.setInverted(True)  # Invert one motor for proper direction
-        self.Shooter = SparkMax.
+        self.motor_1 = SparkMax(AuxConstants.Shooter_ID_1, type=SparkMax.MotorType.kBrushless)
+        self.motor_2 = SparkMax(AuxConstants.Shooter_ID_2, type=SparkMax.MotorType.kBrushless)
 
-    def set_speed(self, speed):
-        self.Shooter.set(speed)
+        self.feeder = SparkMax(AuxConstants.Feeder_ID, type=SparkMax.MotorType.kBrushed)
+
+    def Shooter_set_speed(self, speed):
+        self.motor_1.set(-speed)
+        self.motor_2.set(speed)
+
+    def Shooter_stop(self):
+        self.Shooter_set_speed(0)
+
+    def Feeder_set_speed(self, speed):
+        self.feeder.set(speed)
+
+    def Feeder_stop(self):
+        self.Feeder_set_speed(0)
 
 
-    def stop(self):
-        self.set_speed(0)
-
-
-    def fire(self, distance):
-        x = (-0.0000037 * (distance ^ 2)) + (0.0025 * distance) + 0.736
-        self.set_speed(-x)
-        print(x)
     
 
 

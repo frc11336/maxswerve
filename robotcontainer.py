@@ -33,6 +33,8 @@ from wpimath.controller import (
 from constants import AutoConstants, DriveConstants, OIConstants
 from subsystems.drivesubsystem import DriveSubsystem
 from subsystems.shootersubsystem import ShooterSubsystem
+from subsystems.climbersubsystem import ClimberSubsystem
+from subsystems.intakesubsystem import IntakeSubsystem
 
 
 class RobotContainer:
@@ -47,10 +49,13 @@ class RobotContainer:
         # The robot's subsystems
         self.robotDrive = DriveSubsystem()
         self.Shooter = ShooterSubsystem()
+        self.Climb = ClimberSubsystem()
+        self.Intake = IntakeSubsystem()
         # The driver's controller
         # Using commands2 instead of wpilib
         #self.driverController = wpilib.XboxController(OIConstants.kDriverControllerPort)
         self.distance = 50
+        self.power = 0.75
 
         # The driver's controller
         self.driverController = commands2.button.CommandXboxController(
@@ -97,19 +102,30 @@ class RobotContainer:
             self.distance = round(self.distance - 1)
             print("Distance: " +str(self.distance) + "in")
 
+        def powerplus():
+            self.power = round(self.power + 0.05, 2)
+            print("Power: " +str(self.power))
 
-        self.driverController.y().onTrue(cmd.runOnce(lambda:distanceplus()))
-        self.driverController.x().onTrue(cmd.runOnce(lambda:distanceminus()))
+        def powerminus():
+            self.power = round(self.power - 0.05, 2)
+            print("Power: " +str(self.power))
 
-        self.driverController.rightBumper().onTrue(cmd.runOnce(lambda: self.Shooter.set_speed(self.Shooter.fire(self.distance))))
-        self.driverController.rightBumper().onFalse(cmd.runOnce(lambda: self.Shooter.stop()))
+        #self.driverController.y().onTrue(cmd.runOnce(lambda:distanceplus()))
+        #self.driverController.x().onTrue(cmd.runOnce(lambda:distanceminus()))
+        
+        self.driverController.y().onTrue(cmd.runOnce(lambda:powerplus()))
+        self.driverController.x().onTrue(cmd.runOnce(lambda:powerminus()))
+
+
+        self.driverController.rightBumper().onTrue(cmd.runOnce(lambda: self.Shooter.Shooter_set_speed(self.power)))
+        self.driverController.rightBumper().onFalse(cmd.runOnce(lambda: self.Shooter.Shooter_stop()))
         #self.shooter = SparkMax(AuxConstants.Shooter_ID, SparkMax.MotorType.kBrushless)
         #self.driverController.rightBumper().onTrue(cmd.runOnce(lambda:self.shooter.set(-0.5)))
         #self.driverController.rightBumper().onFalse(cmd.runOnce(lambda:self.shooter.set()))
 
-        self.intake = SparkMax(AuxConstants.Intake_ID, SparkMax.MotorType.kBrushed)
-        self.driverController.leftBumper().onTrue(cmd.runOnce(lambda:self.intake.set(1)))
-        self.driverController.leftBumper().onFalse(cmd.runOnce(lambda:self.intake.set(0)))
+ 
+        self.driverController.leftBumper().onTrue(cmd.runOnce(lambda:self.Intake.Intake_set_speed(1)))
+        self.driverController.leftBumper().onFalse(cmd.runOnce(lambda:self.Intake.Intake_stop()))
 
         #self.lift = SparkMax(AuxConstants.Lift_ID, SparkMax.MotorType.kBrushed)
         #self.driverController.x().onTrue(cmd.runOnce(lambda:self.lift.set(1)))
@@ -117,12 +133,11 @@ class RobotContainer:
         #self.driverController.y().onTrue(cmd.runOnce(lambda:self.lift.set(-1)))
         #self.driverController.y().onTrue(cmd.runOnce(lambda:self.lift.set(0)))
 
-        self.climb = SparkMax(AuxConstants.Climb_ID, SparkMax.MotorType.kBrushless)
-        self.driverController.a().onTrue(cmd.runOnce(lambda:self.climb.set(1)))
-        self.driverController.a().onFalse(cmd.runOnce(lambda:self.climb.set(0)))
-        self.driverController.b().onTrue(cmd.runOnce(lambda:self.climb.set(-1)))
-        self.driverController.b().onFalse(cmd.runOnce(lambda:self.climb.set(0)))
 
+        self.driverController.a().onTrue(cmd.runOnce(lambda:self.Climb.Climb_set_speed(1)))
+        self.driverController.a().onFalse(cmd.runOnce(lambda:self.Climb.Climb_stop()))
+        self.driverController.b().onTrue(cmd.runOnce(lambda:self.Climb.Climb_set_speed(-1)))
+        self.driverController.b().onFalse(cmd.runOnce(lambda:self.Climb.Climb_stop()))
     def disablePIDSubsystems(self) -> None:
         """Disables all ProfiledPIDSubsystem and PIDSubsystem instances.
         This should be called on robot disable to prevent integral windup."""
@@ -151,9 +166,9 @@ class RobotContainer:
             config,
         )
         def Shoot_5sec() :
-            self.Shooter.set_speed(-.5)
+            self.Shooter.Shooter_set_speed(-.5)
             commands2.WaitCommand(5.0)
-            self.Shooter.stop()
+            self.Shooter.Shooter_stop()
         
         Shoot_5sec()
         # Constraint for the motion profiled robot angle controller
