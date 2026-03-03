@@ -30,6 +30,7 @@ from wpimath.controller import (
     ProfiledPIDControllerRadians,
 )
 
+from subsystems.limelight import LimelightCamera
 from constants import AutoConstants, DriveConstants, OIConstants
 from subsystems.drivesubsystem import DriveSubsystem
 from subsystems.shootersubsystem import ShooterSubsystem
@@ -57,6 +58,11 @@ class RobotContainer:
         #self.driverController = wpilib.XboxController(OIConstants.kDriverControllerPort)
         self.distance = 50
         self.power = 0.75
+
+        # The robot's subsystems
+        
+        self.camera = LimelightCamera("limelight-pickup")  # name of your camera goes in parentheses
+
 
         self.relative = False
 
@@ -97,6 +103,18 @@ class RobotContainer:
         instantiating a :GenericHID or one of its subclasses (Joystick or XboxController),
         and then passing it to a JoystickButton.
         """
+        def turn_to_object():
+            x = self.camera.getX()
+            print(f"x={x}")
+            turn_speed = -0.005 * x
+            self.robotDrive.drive(0,0, turn_speed,True, False)
+            # if you want your robot to slowly chase that object... replace this line above with: self.robotDrive.arcadeDrive(0.1, turn_speed)
+
+        backButton = self.driverController.button(wpilib.XboxController.Button.kBack)
+        backButton.whileTrue(commands2.RunCommand(turn_to_object, self.robotDrive))
+        backButton.onFalse(commands2.InstantCommand(lambda: self.robotDrive.drive(0, 0, 0, False, False)))
+
+
         def swaprelative():
             self.relative = not self.relative
 
