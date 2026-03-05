@@ -1,0 +1,25 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "top start to depot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "depot to top start"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "top autos",
+  "choreoAuto": false
+}

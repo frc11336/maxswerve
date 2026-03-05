@@ -1,0 +1,31 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "bottom start to outpost"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "outpost to bottom start"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "bottom autos",
+  "choreoAuto": false
+}

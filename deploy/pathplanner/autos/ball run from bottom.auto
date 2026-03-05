@@ -1,0 +1,31 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "bottom start to balls"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "balls bottom to top"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "balls to top start"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "bottom autos",
+  "choreoAuto": false
+}

@@ -153,7 +153,7 @@ class RobotContainer:
         #self.driverController.rightBumper().onFalse(cmd.runOnce(lambda:self.shooter.set()))
 
  
-        self.driverController.leftBumper().onTrue(cmd.runOnce(lambda:self.Intake.Intake_set_speed(.75)))
+        self.driverController.leftBumper().onTrue(cmd.runOnce(lambda:self.Intake.Intake_set_speed(1)))
         self.driverController.leftBumper().onFalse(cmd.runOnce(lambda:self.Intake.Intake_stop()))
 
         #self.lift = SparkMax(AuxConstants.Lift_ID, SparkMax.MotorType.kBrushed)
