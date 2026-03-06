@@ -26,4 +26,5 @@ requires = [
     "robotpy-rev",
     "robotpy-navx",
     "pyntcore",
+    "robotpy-pathplannerlib",
 ]

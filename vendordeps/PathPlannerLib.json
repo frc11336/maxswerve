@@ -1,0 +1,17 @@
+{
+  "fileName": "PathPlannerLib.json",
+  "name": "PathPlanner",
+  "version": "2026.1.0",
+  "uuid": "e6504b7d-8494-44de-b31c-74d940cc8d03",
+  "mavenUrls": [],
+  "jsonUrl": "https://3015rangerrobotics.github.io/pathplannerlib/PathPlannerLib.json",
+  "jniDependencies": [],
+  "cppDependencies": [],
+  "pythonDependencies": [
+    {
+      "groupId": "pathplannerlib",
+      "artifactId": "pathplannerlib",
+      "version": "2026.1.0"
+    }
+  ]
+}

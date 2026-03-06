@@ -19,7 +19,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.autonomousCommand = None
 
     def autonomousInit(self) -> None:
-        self.autonomousCommand = self.container.getAutonomousCommand()
+        self.autonomousCommand = self.container.autoChooser.getSelected()
 
         if self.autonomousCommand:
             self.autonomousCommand.schedule()

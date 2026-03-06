@@ -66,7 +66,7 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "bottom start blue",
+  "folder": "bottom start",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0
