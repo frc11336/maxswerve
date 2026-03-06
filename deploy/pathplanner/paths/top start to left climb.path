@@ -8,48 +8,27 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.125741970616518,
-        "y": 5.539253224619135
+        "x": 4.486460237872582,
+        "y": 5.549813899052613
       },
       "isLocked": false,
       "linkedName": "top start"
     },
     {
       "anchor": {
-        "x": 0.6211795774647895,
-        "y": 6.829454225352112
+        "x": 1.1161971830985922,
+        "y": 4.625827464788733
       },
       "prevControl": {
-        "x": 0.6555567276519126,
-        "y": 7.077079368552499
-      },
-      "nextControl": {
-        "x": 0.3686401222930428,
-        "y": 5.010364556480273
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 0.9086091549295781,
-        "y": 4.833415492957747
-      },
-      "prevControl": {
-        "x": 0.8982803878339093,
-        "y": 5.53184655534056
+        "x": 0.8690371216461801,
+        "y": 4.5882521534415215
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "depot"
+      "linkedName": "left climb"
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 1.206703910614526,
-      "rotationDegrees": -90.0
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -66,7 +45,7 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "top start",
+  "folder": "top start blue",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

@@ -9,6 +9,7 @@ import math
 import commands2
 import wpimath
 import wpilib
+from wpilib import SmartDashboard
 
 from commands2.button import CommandXboxController
 from wpimath.controller import PIDController, ProfiledPIDControllerRadians
@@ -38,6 +39,9 @@ from subsystems.climbersubsystem import ClimberSubsystem
 from subsystems.intakesubsystem import IntakeSubsystem
 from commands.shootercommands import ShooterCommands
 from commands.limelightcommands import LimelightCommands
+
+from pathplannerlib.auto import PathPlannerAuto
+from pathplannerlib.auto import AutoBuilder
 
 class RobotContainer:
     """
@@ -69,10 +73,18 @@ class RobotContainer:
         self.relative = False
 
         # The driver's controller
-        self.driverController = commands2.button.CommandXboxController(
+        self.driverController = commands2.button.CommandXboxController (
             #OperatorConstants.DRIVER_CONTROLLER_PORT : Directly defining port
             0
         )
+        # Build an auto chooser. This will use Commands.none() as the default option.
+        self.autoChooser = AutoBuilder.buildAutoChooser()
+
+        # Another option that allows you to specify the default auto by its name
+        # self.autoChooser = AutoBuilder.buildAutoChooser("My Default Auto")
+
+        SmartDashboard.putData("Auto Chooser", self.autoChooser)
+        
 
         # Configure the button bindings
         self.configureButtonBindings()
@@ -98,6 +110,9 @@ class RobotContainer:
                 self.robotDrive,
             )
         )
+    
+    def getAutonomousCommand(self):
+        return self.autoChooser.getSelected()
 
     def configureButtonBindings(self) -> None:
         """

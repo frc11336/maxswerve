@@ -30,6 +30,12 @@ from constants import DriveConstants
 import swerveutils
 from .maxswervemodule import MAXSwerveModule
 
+from pathplannerlib.auto import AutoBuilder
+from pathplannerlib.controller import PPHolonomicDriveController
+from pathplannerlib.controller import PPLTVController
+from pathplannerlib.config import RobotConfig, PIDConstants
+from pathplannerlib.auto import PathPlannerAuto
+from wpilib import DriverStation
 
 class DriveSubsystem(Subsystem):
     def __init__(self) -> None:
@@ -59,6 +65,8 @@ class DriveSubsystem(Subsystem):
             DriveConstants.kRearRightTurningCanId,
             DriveConstants.kBackRightChassisAngularOffset,
         )
+
+        config = RobotConfig.fromGUISettings()
 
 
         # The gyro sensor
@@ -90,6 +98,24 @@ class DriveSubsystem(Subsystem):
                 self.rearRight.getPosition(),
             ),
         )
+
+         # Configure the AutoBuilder last
+        AutoBuilder.configure(
+            self.getPose, # Robot pose supplier
+            self.resetPose, # Method to reset odometry (will be called if your auto has a starting pose)
+            self.getRobotRelativeSpeeds, # ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+            lambda speeds, feedforwards: self.driveRobotRelative(speeds), # Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also outputs individual module feedforwards
+            PPLTVController(0.02), # PPLTVController is the built in path following controller for differential drive trains
+            config, # The robot configuration
+            self.shouldFlipPath, # Supplier to control path flipping based on alliance color
+            self # Reference to this subsystem to set requirements
+        )
+
+    def shouldFlipPath():
+        # Boolean supplier that controls when the path will be mirrored for the red alliance
+        # This will flip the path being followed to the red side of the field.
+        # THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+        return DriverStation.getAlliance() == DriverStation.Alliance.kRed
 
     def periodic(self) -> None:
         # Update the odometry in the periodic block

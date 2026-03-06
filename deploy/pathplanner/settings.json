@@ -3,10 +3,10 @@
   "robotLength": 0.9,
   "holonomicMode": true,
   "pathFolders": [
-    "multi-use",
-    "bottom start",
-    "center start",
-    "top start"
+    "bottom start blue",
+    "center start blue",
+    "multi-use blue",
+    "top start blue"
   ],
   "autoFolders": [
     "bottom autos",
