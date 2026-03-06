@@ -110,9 +110,7 @@ class RobotContainer:
                 self.robotDrive,
             )
         )
-    
-    def getAutonomousCommand(self):
-        return self.autoChooser.getSelected()
+        
 
     def configureButtonBindings(self) -> None:
         """
