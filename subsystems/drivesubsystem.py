@@ -11,7 +11,8 @@ import navx
 from rev import PersistMode, ResetMode, SparkBase, SparkBaseConfig, SparkMax, SparkMaxConfig
 
 import wpilib
-from wpilib import SPI
+from wpilib import SPI, SmartDashboard
+from wpilib.shuffleboard import Shuffleboard
 
 import wpimath.controller
 
@@ -88,7 +89,7 @@ class DriveSubsystem(Subsystem):
         # Odometry class for tracking robot pose
         self.odometry = SwerveDrive4Odometry(
             DriveConstants.kDriveKinematics,
-            Rotation2d.fromDegrees(self.gyro.getAngle()),
+            self.gyro.getRotation2d(),
             (
                 self.frontLeft.getPosition(),
                 self.frontRight.getPosition(),
@@ -104,27 +105,41 @@ class DriveSubsystem(Subsystem):
             self.getRobotRelativeSpeeds, # ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             self.driveRobotRelative, # Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also outputs individual module feedforwards
             PPHolonomicDriveController(
-                PIDConstants(5.0, 0.0, 0.0),  # Translation PID
-                PIDConstants(5.0, 0.0, 0.0)   # Rotation PID
+                PIDConstants(7.5, 5.0, 0.0),  # Translation PID
+                PIDConstants(7.5, 5.0, 0.0)   # Rotation PID
             ), # PPHolonomicDriveController for swerve drives
             config, # The robot configuration
             self.shouldFlipPath, # Supplier to control path flipping based on alliance color
             self # Reference to this subsystem to set requirements
         )
 
+        # Create field visualization
+        from wpilib import Field2d
+        self.field = Field2d()
+        SmartDashboard.putData("Field", self.field)
+
    
 
     def periodic(self) -> None:
         # Update the odometry in the periodic block
-        self.odometry.update(
-            Rotation2d.fromDegrees(self.gyro.getAngle()),
+        self.odometry.update((
+            self.gyro.getRotation2d()),
             (
                 self.frontLeft.getPosition(),
                 self.frontRight.getPosition(),
                 self.rearLeft.getPosition(),
                 self.rearRight.getPosition(),
-            ),
-        )
+            ))
+        
+        
+        # Update field visualization
+        self.field.setRobotPose(self.odometry.getPose())
+        
+        # Publish pose to SmartDashboard for visualization
+        pose = self.odometry.getPose()
+        SmartDashboard.putNumber("Robot X", pose.X())
+        SmartDashboard.putNumber("Robot Y", pose.Y())
+        SmartDashboard.putNumber("Robot Angle", pose.rotation().degrees())
         """
         # Log battery voltage
         voltage = wpilib.RobotController.getBatteryVoltage()

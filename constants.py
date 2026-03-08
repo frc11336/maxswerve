@@ -26,7 +26,7 @@ class NeoMotorConstants:
 class DriveConstants:
     # Driving Parameters - Note that these are not the maximum capable speeds of
     # the robot, rather the allowed maximum speeds
-    kMaxSpeedMetersPerSecond = 8
+    kMaxSpeedMetersPerSecond = 16
     kMaxAngularSpeed = math.tau * 2 # radians per second
 
 
@@ -52,7 +52,7 @@ class DriveConstants:
     kFrontLeftChassisAngularOffset = math.pi
     kFrontRightChassisAngularOffset = math.pi
     kBackLeftChassisAngularOffset = math.pi
-    kBackRightChassisAngularOffset = math.pi
+    kBackRightChassisAngularOffset = -math.pi/2
 
     # SPARK MAX CAN IDs
     kFrontLeftDrivingCanId = 6
@@ -65,7 +65,7 @@ class DriveConstants:
     kFrontRightTurningCanId = 3
     kRearRightTurningCanId = 9
 
-    kGyroReversed = False
+    kGyroReversed = True
 
     
 
@@ -130,10 +130,10 @@ class OIConstants:
 
 
 class AutoConstants:
-    kMaxSpeedMetersPerSecond = 3
-    kMaxAccelerationMetersPerSecondSquared = 3
-    kMaxAngularSpeedRadiansPerSecond = math.pi
-    kMaxAngularSpeedRadiansPerSecondSquared = math.pi
+    kMaxSpeedMetersPerSecond = 16
+    kMaxAccelerationMetersPerSecondSquared = 16
+    kMaxAngularSpeedRadiansPerSecond = math.pi *2
+    kMaxAngularSpeedRadiansPerSecondSquared = math.pi *2
 
 class AuxConstants:
     Intake_ID = 12

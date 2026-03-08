@@ -7,25 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "top start to outpost"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 3.0
+            "pathName": "start to shooting"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "outpost to top start"
+            "pathName": "shooting to climbing"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "top start",
+  "folder": "comp",
   "choreoAuto": false
 }

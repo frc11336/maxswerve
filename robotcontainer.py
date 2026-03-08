@@ -42,6 +42,8 @@ from commands.limelightcommands import LimelightCommands
 
 from pathplannerlib.auto import PathPlannerAuto
 from pathplannerlib.auto import AutoBuilder
+from pathplannerlib.auto import NamedCommands
+
 
 class RobotContainer:
     """
@@ -64,6 +66,7 @@ class RobotContainer:
         #self.driverController = wpilib.XboxController(OIConstants.kDriverControllerPort)
         self.distance = 50
         self.power = 0.75
+        self.intakespeed = 1
 
         # The robot's subsystems
         
@@ -73,10 +76,11 @@ class RobotContainer:
         self.relative = False
 
         # The driver's controller
-        self.driverController = commands2.button.CommandXboxController (
-            #OperatorConstants.DRIVER_CONTROLLER_PORT : Directly defining port
-            0
-        )
+        self.driverController = commands2.button.CommandXboxController (0)
+        self.auxilaryController = commands2.button.CommandXboxController(1)
+
+        self.registerNamedCommands()
+
         # Build an auto chooser. This will use Commands.none() as the default option.
         self.autoChooser = AutoBuilder.buildAutoChooser()
 
@@ -127,11 +131,16 @@ class RobotContainer:
 
         backButton = self.driverController.button(wpilib.XboxController.Button.kBack)
         backButton.onTrue(cmd.runOnce(lambda: print(self.cameracommands.get_distance())))
+
+
      
 
 
         def swaprelative():
             self.relative = not self.relative
+
+        def swapintake():
+            self.intakespeed = -1* self.intakespeed
 
         self.driverController.start().onTrue(cmd.runOnce(lambda: swaprelative()))
 
@@ -144,30 +153,36 @@ class RobotContainer:
             print("Distance: " +str(self.distance) + "in")
 
         def powerplus():
-            self.power = round(self.power + 0.05, 2)
+            self.power = round(self.power + 0.01, 2)
             print("Power: " +str(self.power))
 
         def powerminus():
-            self.power = round(self.power - 0.05, 2)
+            self.power = round(self.power - 0.01, 2)
             print("Power: " +str(self.power))
 
         #self.driverController.y().onTrue(cmd.runOnce(lambda:distanceplus()))
         #self.driverController.x().onTrue(cmd.runOnce(lambda:distanceminus()))
-        
-        self.driverController.y().onTrue(cmd.runOnce(lambda:powerplus()))
-        self.driverController.x().onTrue(cmd.runOnce(lambda:powerminus()))
 
-        self.driverController.rightBumper().onTrue(cmd.runOnce(lambda: self.ShooterCommands.fire_Power(self.power)))
+        self.auxilaryController.start().onTrue(cmd.runOnce(lambda: self.robotDrive.resetOdometry))
+        self.auxilaryController.rightBumper().onTrue(cmd.runOnce(lambda:self.Intake.Intake_set_speed(-self.intakespeed)))
+        self.auxilaryController.rightBumper().onFalse(cmd.runOnce(lambda:self.Intake.Intake_stop()))
+
+        self.auxilaryController.leftBumper().onTrue(cmd.runOnce(lambda:self.Intake.Intake_set_speed(self.intakespeed)))
+        self.auxilaryController.leftBumper().onFalse(cmd.runOnce(lambda:self.Intake.Intake_stop()))
+        
+        self.auxilaryController.y().onTrue(cmd.runOnce(lambda:powerplus()))
+        self.auxilaryController.x().onTrue(cmd.runOnce(lambda:powerminus()))
+
+        self.auxilaryController.a().onTrue(cmd.runOnce(lambda: self.ShooterCommands.fire_Power(self.power)))
         #self.driverController.rightBumper().onTrue(cmd.runOnce(lambda: self.ShooterCommands.fire(self.distance)))
-        self.driverController.rightBumper().onFalse(cmd.runOnce(lambda: self.Shooter.Shooter_stop()))
-        self.driverController.rightBumper().onFalse(cmd.runOnce(lambda: self.Shooter.Feeder_stop()))
+        self.auxilaryController.a().onFalse(cmd.runOnce(lambda: self.Shooter.Shooter_stop()))
+        self.auxilaryController.a().onFalse(cmd.runOnce(lambda: self.Shooter.Feeder_stop()))
         #self.shooter = SparkMax(AuxConstants.Shooter_ID, SparkMax.MotorType.kBrushless)
         #self.driverController.rightBumper().onTrue(cmd.runOnce(lambda:self.shooter.set(-0.5)))
         #self.driverController.rightBumper().onFalse(cmd.runOnce(lambda:self.shooter.set()))
 
  
-        self.driverController.leftBumper().onTrue(cmd.runOnce(lambda:self.Intake.Intake_set_speed(1)))
-        self.driverController.leftBumper().onFalse(cmd.runOnce(lambda:self.Intake.Intake_stop()))
+        
 
         #self.lift = SparkMax(AuxConstants.Lift_ID, SparkMax.MotorType.kBrushed)
         #self.driverController.x().onTrue(cmd.runOnce(lambda:self.lift.set(1)))
@@ -207,12 +222,7 @@ class RobotContainer:
             Pose2d(.3, 0, Rotation2d(0)),
             config,
         )
-        def Shoot_5sec() :
-            self.Shooter.Shooter_set_speed(-.5)
-            commands2.WaitCommand(5.0)
-            self.Shooter.Shooter_stop()
-        
-        Shoot_5sec()
+
         # Constraint for the motion profiled robot angle controller
         kThetaControllerConstraints = TrapezoidProfileRadians.Constraints(
             AutoConstants.kMaxAngularSpeedRadiansPerSecond,
@@ -241,6 +251,8 @@ class RobotContainer:
             (self.robotDrive,),
         )
 
+
+
         
         # Reset odometry to the starting pose of the trajectory.
         self.robotDrive.resetOdometry(exampleTrajectory.initialPose())
@@ -252,4 +264,10 @@ class RobotContainer:
                 self.robotDrive,
             )
         )
+    def getautocommand(self):
+       return cmd.runOnce(lambda: self.ShooterCommands.fire_Power(.7))
 
+
+
+    def registerNamedCommands(self):
+        NamedCommands.registerCommand("shoot", cmd.runOnce(lambda: self.ShooterCommands.fire_Power(.7)))

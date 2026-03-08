@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.0,
-        "y": 4.0
+        "x": 1.9305809859154937,
+        "y": 4.035
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.0,
-        "y": 4.0
+        "x": 1.8347711267605642,
+        "y": 2.885281690140845
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "comp shooting"
     },
     {
       "anchor": {
-        "x": 3.0,
-        "y": 4.0
+        "x": 1.0363556338028177,
+        "y": 2.789471830985916
       },
       "prevControl": {
-        "x": 2.0,
-        "y": 4.0
+        "x": 1.7708978873239445,
+        "y": 2.7735035211267607
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "left climb"
     }
   ],
   "rotationTargets": [],
@@ -45,7 +45,7 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "tests",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

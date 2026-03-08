@@ -7,25 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "top start to outpost"
+            "pathName": "Reverse Meter"
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 3.0
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "outpost to top start"
+            "name": "shoot"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "top start",
+  "folder": "tests",
   "choreoAuto": false
 }

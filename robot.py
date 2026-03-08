@@ -17,9 +17,11 @@ class MyRobot(commands2.TimedCommandRobot):
         # autonomous chooser on the dashboard.
         self.container = RobotContainer()
         self.autonomousCommand = None
+        
 
     def autonomousInit(self) -> None:
         self.autonomousCommand = self.container.autoChooser.getSelected()
+        #self.autonomousCommand = self.container.getautocommand()
 
         if self.autonomousCommand:
             self.autonomousCommand.schedule()
