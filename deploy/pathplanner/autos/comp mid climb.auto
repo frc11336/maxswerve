@@ -15,6 +15,12 @@
           "data": {
             "commands": [
               {
+                "type": "wait",
+                "data": {
+                  "waitTime": 3.0
+                }
+              },
+              {
                 "type": "named",
                 "data": {
                   "name": "spool"
@@ -38,26 +44,27 @@
                     }
                   ]
                 }
-              },
-              {
-                "type": "wait",
-                "data": {
-                  "waitTime": 3.0
-                }
               }
             ]
           }
         },
         {
-          "type": "named",
+          "type": "deadline",
           "data": {
-            "name": "stop_shoot"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "shooting to climbing"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "shooting to climbing"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "stopshoot"
+                }
+              }
+            ]
           }
         },
         {
@@ -73,7 +80,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 3.0
+                  "waitTime": 1.0
                 }
               },
               {
@@ -83,6 +90,12 @@
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopclimb"
           }
         }
       ]

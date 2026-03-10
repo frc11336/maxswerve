@@ -89,7 +89,7 @@ class DriveSubsystem(Subsystem):
         # Odometry class for tracking robot pose
         self.odometry = SwerveDrive4Odometry(
             DriveConstants.kDriveKinematics,
-            self.gyro.getRotation2d(),
+            -self.gyro.getRotation2d(),
             (
                 self.frontLeft.getPosition(),
                 self.frontRight.getPosition(),
@@ -123,7 +123,7 @@ class DriveSubsystem(Subsystem):
     def periodic(self) -> None:
         # Update the odometry in the periodic block
         self.odometry.update((
-            self.gyro.getRotation2d()),
+            -self.gyro.getRotation2d()),
             (
                 self.frontLeft.getPosition(),
                 self.frontRight.getPosition(),

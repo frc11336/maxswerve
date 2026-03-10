@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.5433802816901414,
-        "y": 7.3883450704225355
+        "x": 0.52536971830986,
+        "y": 0.63375
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.543380281690141,
-        "y": 7.3883450704225355
+        "x": 1.52536971830986,
+        "y": 0.63375
       },
       "isLocked": false,
-      "linkedName": "top trench"
+      "linkedName": "outpost"
     },
     {
       "anchor": {
-        "x": 7.790950704225352,
-        "y": 5.983133802816901
+        "x": 1.9305809859154937,
+        "y": 4.035
       },
       "prevControl": {
-        "x": 7.966602112676057,
-        "y": 7.579964788732398
+        "x": 1.9305809859154937,
+        "y": 3.035
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "mid fuel top"
+      "linkedName": "comp shooting"
     }
   ],
   "rotationTargets": [],
@@ -45,10 +45,10 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "multi-use",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 1.4688007143858497
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

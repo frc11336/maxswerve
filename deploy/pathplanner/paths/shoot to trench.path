@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.790950704225352,
-        "y": 2.214612676056338
+        "x": 1.9305809859154937,
+        "y": 4.035
       },
       "prevControl": null,
       "nextControl": {
-        "x": 8.828890845070424,
-        "y": 2.2465492957746482
+        "x": 1.4066547406082288,
+        "y": 5.341144901610018
       },
       "isLocked": false,
-      "linkedName": "mid fuel bottom"
+      "linkedName": "comp shooting"
     },
     {
       "anchor": {
-        "x": 9.212130281690142,
-        "y": 0.41019366197183105
+        "x": 3.5433802816901414,
+        "y": 7.3883450704225355
       },
       "prevControl": {
-        "x": 10.409753521126763,
-        "y": 0.37825704225352197
+        "x": 2.5433802816901414,
+        "y": 7.3883450704225355
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "wall"
+      "linkedName": "top trench"
     }
   ],
   "rotationTargets": [],
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 1.4688007143858497
   },
   "reversed": false,
   "folder": "multi-use",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

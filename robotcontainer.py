@@ -62,6 +62,16 @@ class RobotContainer:
         self.Intake = IntakeSubsystem()
         self.ShooterCommands = ShooterCommands(self.Shooter)
         self.ClimbCommands = LiftCommands(self.Climb)
+
+        NamedCommands.registerCommand("spool", cmd.run(lambda: self.Shooter.Shooter_set_speed(.7)))
+        NamedCommands.registerCommand("feed", cmd.run(lambda: self.Shooter.Feeder_set_speed(1)))
+        NamedCommands.registerCommand("stopshoot", cmd.run(lambda: self.Shooter.Shooter_kill()))
+        NamedCommands.registerCommand("climb", cmd.run(lambda: self.Climb.Climb_set_speed(.5)))
+        NamedCommands.registerCommand("stopclimb", cmd.run(lambda: self.Climb.Climb_stop()))
+        NamedCommands.registerCommand("reverseclimb", cmd.run(lambda: self.Climb.Climb_set_speed(-.5)))
+        NamedCommands.registerCommand("intake", cmd.run(lambda: self.Intake.Intake_set_speed(1)))
+        NamedCommands.registerCommand("stopintake", cmd.run(lambda: self.Intake.Intake_stop()))
+    
     
         
         # The driver's controller
@@ -92,7 +102,7 @@ class RobotContainer:
         # Another option that allows you to specify the default auto by its name
         # self.autoChooser = AutoBuilder.buildAutoChooser("My Default Auto")
 
-        self.setupnamedcommand()
+        #self.setupnamedcommand()
 
         SmartDashboard.putData("Auto Chooser", self.autoChooser)
         
