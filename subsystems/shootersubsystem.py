@@ -34,6 +34,10 @@ class ShooterSubsystem(commands2.Subsystem):
 
     def Feeder_stop(self):
         self.Feeder_set_speed(0)
+    
+    def Shooter_kill(self):
+        self.Shooter_stop()
+        self.Feeder_stop()
 
 
     

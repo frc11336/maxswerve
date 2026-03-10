@@ -39,6 +39,7 @@ from subsystems.climbersubsystem import ClimberSubsystem
 from subsystems.intakesubsystem import IntakeSubsystem
 from commands.shootercommands import ShooterCommands
 from commands.limelightcommands import LimelightCommands
+from commands.liftcommands import LiftCommands
 
 from pathplannerlib.auto import PathPlannerAuto
 from pathplannerlib.auto import AutoBuilder
@@ -60,6 +61,8 @@ class RobotContainer:
         self.Climb = ClimberSubsystem()
         self.Intake = IntakeSubsystem()
         self.ShooterCommands = ShooterCommands(self.Shooter)
+        self.ClimbCommands = LiftCommands(self.Climb)
+    
         
         # The driver's controller
         # Using commands2 instead of wpilib
@@ -79,13 +82,17 @@ class RobotContainer:
         self.driverController = commands2.button.CommandXboxController (0)
         self.auxilaryController = commands2.button.CommandXboxController(1)
 
-        self.registerNamedCommands()
-
+ 
+        
         # Build an auto chooser. This will use Commands.none() as the default option.
         self.autoChooser = AutoBuilder.buildAutoChooser()
 
+
+
         # Another option that allows you to specify the default auto by its name
         # self.autoChooser = AutoBuilder.buildAutoChooser("My Default Auto")
+
+        self.setupnamedcommand()
 
         SmartDashboard.putData("Auto Chooser", self.autoChooser)
         
@@ -114,7 +121,19 @@ class RobotContainer:
                 self.robotDrive,
             )
         )
+    
         
+    
+
+    def setupnamedcommand(self):
+        NamedCommands.registerCommand("spool", cmd.run(lambda: self.Shooter.Shooter_set_speed(.7)))
+        NamedCommands.registerCommand("feed", cmd.run(lambda: self.Shooter.Feeder_set_speed(1)))
+        NamedCommands.registerCommand("stopshoot", cmd.run(lambda: self.Shooter.Shooter_kill()))
+        NamedCommands.registerCommand("climb", cmd.run(lambda: self.Climb.Climb_set_speed(.5)))
+
+
+    def getautonomouscommand(self):
+        return self.autoChooser.getSelected()
 
     def configureButtonBindings(self) -> None:
         """
@@ -132,15 +151,8 @@ class RobotContainer:
         backButton = self.driverController.button(wpilib.XboxController.Button.kBack)
         backButton.onTrue(cmd.runOnce(lambda: print(self.cameracommands.get_distance())))
 
-
-     
-
-
         def swaprelative():
             self.relative = not self.relative
-
-        def swapintake():
-            self.intakespeed = -1* self.intakespeed
 
         self.driverController.start().onTrue(cmd.runOnce(lambda: swaprelative()))
 
@@ -163,38 +175,26 @@ class RobotContainer:
         #self.driverController.y().onTrue(cmd.runOnce(lambda:distanceplus()))
         #self.driverController.x().onTrue(cmd.runOnce(lambda:distanceminus()))
 
+        self.auxilaryController.y().onTrue(cmd.runOnce(lambda:powerplus()))
+        self.auxilaryController.x().onTrue(cmd.runOnce(lambda:powerminus()))
+
         self.auxilaryController.start().onTrue(cmd.runOnce(lambda: self.robotDrive.resetOdometry))
         self.auxilaryController.rightBumper().onTrue(cmd.runOnce(lambda:self.Intake.Intake_set_speed(-self.intakespeed)))
         self.auxilaryController.rightBumper().onFalse(cmd.runOnce(lambda:self.Intake.Intake_stop()))
 
         self.auxilaryController.leftBumper().onTrue(cmd.runOnce(lambda:self.Intake.Intake_set_speed(self.intakespeed)))
         self.auxilaryController.leftBumper().onFalse(cmd.runOnce(lambda:self.Intake.Intake_stop()))
-        
-        self.auxilaryController.y().onTrue(cmd.runOnce(lambda:powerplus()))
-        self.auxilaryController.x().onTrue(cmd.runOnce(lambda:powerminus()))
-
+ 
         self.auxilaryController.a().onTrue(cmd.runOnce(lambda: self.ShooterCommands.fire_Power(self.power)))
         #self.driverController.rightBumper().onTrue(cmd.runOnce(lambda: self.ShooterCommands.fire(self.distance)))
-        self.auxilaryController.a().onFalse(cmd.runOnce(lambda: self.Shooter.Shooter_stop()))
-        self.auxilaryController.a().onFalse(cmd.runOnce(lambda: self.Shooter.Feeder_stop()))
-        #self.shooter = SparkMax(AuxConstants.Shooter_ID, SparkMax.MotorType.kBrushless)
-        #self.driverController.rightBumper().onTrue(cmd.runOnce(lambda:self.shooter.set(-0.5)))
-        #self.driverController.rightBumper().onFalse(cmd.runOnce(lambda:self.shooter.set()))
-
- 
-        
-
-        #self.lift = SparkMax(AuxConstants.Lift_ID, SparkMax.MotorType.kBrushed)
-        #self.driverController.x().onTrue(cmd.runOnce(lambda:self.lift.set(1)))
-        #self.driverController.x().onTrue(cmd.runOnce(lambda:self.lift.set(0)))
-        #self.driverController.y().onTrue(cmd.runOnce(lambda:self.lift.set(-1)))
-        #self.driverController.y().onTrue(cmd.runOnce(lambda:self.lift.set(0)))
-
+        self.auxilaryController.a().onFalse(cmd.runOnce(lambda: self.Shooter.Shooter_kill()))
 
         self.driverController.a().onTrue(cmd.runOnce(lambda:self.Climb.Climb_set_speed(.5)))
         self.driverController.a().onFalse(cmd.runOnce(lambda:self.Climb.Climb_stop()))
         self.driverController.b().onTrue(cmd.runOnce(lambda:self.Climb.Climb_set_speed(-.5)))
         self.driverController.b().onFalse(cmd.runOnce(lambda:self.Climb.Climb_stop()))
+
+
     def disablePIDSubsystems(self) -> None:
         """Disables all ProfiledPIDSubsystem and PIDSubsystem instances.
         This should be called on robot disable to prevent integral windup."""
@@ -264,10 +264,5 @@ class RobotContainer:
                 self.robotDrive,
             )
         )
-    def getautocommand(self):
-       return cmd.runOnce(lambda: self.ShooterCommands.fire_Power(.7))
 
 
-
-    def registerNamedCommands(self):
-        NamedCommands.registerCommand("shoot", cmd.runOnce(lambda: self.ShooterCommands.fire_Power(.7)))

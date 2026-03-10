@@ -1,0 +1,43 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "start to trench"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "trench to mid"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "through mid"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "mid to wall"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "wall to outpost"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "comp",
+  "choreoAuto": false
+}

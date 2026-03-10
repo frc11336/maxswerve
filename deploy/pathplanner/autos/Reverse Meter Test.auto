@@ -9,12 +9,6 @@
           "data": {
             "pathName": "Reverse Meter"
           }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "shoot"
-          }
         }
       ]
     }
