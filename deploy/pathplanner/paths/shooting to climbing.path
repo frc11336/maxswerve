@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.9305809859154937,
-        "y": 4.035
+        "x": 1.5,
+        "y": 3.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.9305809859154937,
-        "y": 2.454137323943662
+        "x": 1.5,
+        "y": 1.4191373239436618
       },
       "isLocked": false,
       "linkedName": "comp shooting"

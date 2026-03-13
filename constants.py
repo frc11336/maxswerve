@@ -26,7 +26,7 @@ class NeoMotorConstants:
 class DriveConstants:
     # Driving Parameters - Note that these are not the maximum capable speeds of
     # the robot, rather the allowed maximum speeds
-    kMaxSpeedMetersPerSecond = 16
+    kMaxSpeedMetersPerSecond = 64
     kMaxAngularSpeed = math.tau * 2 # radians per second
 
 

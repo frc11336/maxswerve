@@ -77,6 +77,12 @@
         {
           "type": "path",
           "data": {
+            "pathName": "intake jiggle forward"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
             "pathName": "shoot to trench"
           }
         },

@@ -209,11 +209,13 @@ class RobotContainer:
         """Disables all ProfiledPIDSubsystem and PIDSubsystem instances.
         This should be called on robot disable to prevent integral windup."""
 
+    """
     def getAutonomousCommand(self) -> commands2.Command:
-        """Use this to pass the autonomous command to the main {@link Robot} class.
+        ""
+        Use this to pass the autonomous command to the main {@link Robot} class.
 
         :returns: the command to run in autonomous
-        """
+        ""
         # Create config for trajectory
         config = TrajectoryConfig(
             AutoConstants.kMaxSpeedMetersPerSecond,
@@ -227,9 +229,9 @@ class RobotContainer:
             # Start at the origin facing the +X direction
             Pose2d(0, 0, Rotation2d(0)),
             # Pass through these two interior waypoints, making an 's' curve path
-            [Translation2d(.1, .1), Translation2d(.2, -.1)],
+            [Translation2d(.3, 0), Translation2d(.6, 0)],
             # End 3 meters straight ahead of where we started, facing forward
-            Pose2d(.3, 0, Rotation2d(0)),
+            Pose2d(1, 0, Rotation2d(0)),
             config,
         )
 
@@ -260,7 +262,7 @@ class RobotContainer:
             lambda desiredStates: self.robotDrive.setModuleStates(desiredStates),
             (self.robotDrive,),
         )
-
+        
 
 
         
@@ -274,5 +276,5 @@ class RobotContainer:
                 self.robotDrive,
             )
         )
-
+        """
 

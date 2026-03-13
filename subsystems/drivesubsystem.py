@@ -117,6 +117,9 @@ class DriveSubsystem(Subsystem):
         from wpilib import Field2d
         self.field = Field2d()
         SmartDashboard.putData("Field", self.field)
+        
+        # For testing max speed
+        self.testMode = False
 
    
 
@@ -140,6 +143,12 @@ class DriveSubsystem(Subsystem):
         SmartDashboard.putNumber("Robot X", pose.X())
         SmartDashboard.putNumber("Robot Y", pose.Y())
         SmartDashboard.putNumber("Robot Angle", pose.rotation().degrees())
+        
+        # Publish actual measured speeds for testing
+        speeds = self.getRobotRelativeSpeeds()
+        SmartDashboard.putNumber("Measured Speed X", speeds.vx)
+        SmartDashboard.putNumber("Measured Speed Y", speeds.vy)
+        SmartDashboard.putNumber("Measured Speed Magnitude", math.sqrt(speeds.vx**2 + speeds.vy**2))
         """
         # Log battery voltage
         voltage = wpilib.RobotController.getBatteryVoltage()
@@ -383,3 +392,15 @@ class DriveSubsystem(Subsystem):
         """
         alliance = DriverStation.getAlliance()
         return alliance == DriverStation.Alliance.kRed
+
+    def testMaxSpeedForward(self) -> None:
+        """Drives forward at maximum speed for testing."""
+        self.drive(1.0, 0.0, 0.0, False, False)
+
+    def testMaxSpeedStrafe(self) -> None:
+        """Strafes left at maximum speed for testing."""
+        self.drive(0.0, 1.0, 0.0, False, False)
+
+    def testStop(self) -> None:
+        """Stops all drive motors."""
+        self.drive(0.0, 0.0, 0.0, False, False)
