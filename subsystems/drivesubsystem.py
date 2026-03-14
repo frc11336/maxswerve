@@ -69,7 +69,13 @@ class DriveSubsystem(Subsystem):
         config = RobotConfig.fromGUISettings()
 
         # The gyro sensor
-        self.gyro = navx.AHRS.create_spi()
+        try:
+            self.gyro = navx.AHRS.create_spi()
+            print("NavX gyro initialized successfully")
+        except Exception as e:
+            print(f"WARNING: Failed to initialize NavX gyro: {e}")
+            # Create a dummy gyro that returns 0 for testing
+            self.gyro = None
 
         # Print absolute encoder positions for all modules at startup
         print("FL abs encoder:", self.frontLeft.turningEncoder.getPosition())
@@ -89,7 +95,7 @@ class DriveSubsystem(Subsystem):
         # Odometry class for tracking robot pose
         self.odometry = SwerveDrive4Odometry(
             DriveConstants.kDriveKinematics,
-            -self.gyro.getRotation2d(),
+            -(self.gyro.getRotation2d() if self.gyro is not None else Rotation2d()),
             (
                 self.frontLeft.getPosition(),
                 self.frontRight.getPosition(),
@@ -125,8 +131,13 @@ class DriveSubsystem(Subsystem):
 
     def periodic(self) -> None:
         # Update the odometry in the periodic block
-        self.odometry.update((
-            -self.gyro.getRotation2d()),
+        if self.gyro is not None:
+            rotation = -self.gyro.getRotation2d()
+        else:
+            rotation = Rotation2d(0)
+            
+        self.odometry.update(
+            rotation,
             (
                 self.frontLeft.getPosition(),
                 self.frontRight.getPosition(),
@@ -186,8 +197,13 @@ class DriveSubsystem(Subsystem):
         :param pose: The pose to which to set the odometry.
 
         """
+        if self.gyro is not None:
+            angle = Rotation2d.fromDegrees(self.gyro.getAngle())
+        else:
+            angle = Rotation2d(0)
+            
         self.odometry.resetPosition(
-            Rotation2d.fromDegrees(self.gyro.getAngle()),
+            angle,
             (
                 self.frontLeft.getPosition(),
                 self.frontRight.getPosition(),
@@ -291,7 +307,7 @@ class DriveSubsystem(Subsystem):
                 xSpeedDelivered,
                 ySpeedDelivered,
                 rotDelivered,
-                Rotation2d.fromDegrees(self.gyro.getAngle()),
+                Rotation2d.fromDegrees(self.gyro.getAngle() if self.gyro else 0),
             )
             if fieldRelative
             else ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered)
@@ -339,21 +355,26 @@ class DriveSubsystem(Subsystem):
 
     def zeroHeading(self) -> None:
         """Zeroes the heading of the robot."""
-        self.gyro.reset()
+        if self.gyro:
+            self.gyro.reset()
 
     def getHeading(self) -> float:
         """Returns the heading of the robot.
 
         :returns: the robot's heading in degrees, from -180 to 180
         """
-        return Rotation2d.fromDegrees(self.gyro.getAngle()).degrees()
+        if self.gyro:
+            return Rotation2d.fromDegrees(self.gyro.getAngle()).degrees()
+        return 0.0
 
     def getTurnRate(self) -> float:
         """Returns the turn rate of the robot.
 
         :returns: The turn rate of the robot, in degrees per second
         """
-        return self.gyro.getRate() * (-1.0 if DriveConstants.kGyroReversed else 1.0)
+        if self.gyro:
+            return self.gyro.getRate() * (-1.0 if DriveConstants.kGyroReversed else 1.0)
+        return 0.0
 
     def getRobotRelativeSpeeds(self) -> ChassisSpeeds:
         """Returns the robot-relative speeds of the robot.
@@ -404,3 +425,10 @@ class DriveSubsystem(Subsystem):
     def testStop(self) -> None:
         """Stops all drive motors."""
         self.drive(0.0, 0.0, 0.0, False, False)
+
+    def rotate(self, rotSpeed) -> None:
+        """
+        Rotate the robot in place, without moving laterally (for example, for aiming)
+        :param speed: rotation speed 
+        """
+        self.drive(0, 0, rotSpeed, False, False)

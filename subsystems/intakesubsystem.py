@@ -4,7 +4,7 @@ import rev
 import time
 import math
 from constants import AuxConstants
-from rev import SparkMax, SparkMaxConfig
+from rev import SparkMax, SparkMaxConfig, ResetMode, PersistMode
 from commands2.button import CommandXboxController
 # 1. Subsystem
 class IntakeSubsystem(commands2.Subsystem):
@@ -12,7 +12,11 @@ class IntakeSubsystem(commands2.Subsystem):
         super().__init__()
         # Initialize NEO motor
         self.Intake = SparkMax(AuxConstants.Intake_ID, type=SparkMax.MotorType.kBrushless)
-        self.Intake.setInverted(False)
+        
+        # Configure intake motor
+        intake_config = SparkMaxConfig()
+        intake_config.inverted(False)
+        self.Intake.configure(intake_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters)
 
 
     def Intake_set_speed(self, speed):

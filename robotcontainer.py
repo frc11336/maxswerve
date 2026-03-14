@@ -11,6 +11,9 @@ import wpimath
 import wpilib
 from wpilib import SmartDashboard
 
+import json
+import time
+
 from commands2.button import CommandXboxController
 from wpimath.controller import PIDController, ProfiledPIDControllerRadians
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d
@@ -40,10 +43,14 @@ from subsystems.intakesubsystem import IntakeSubsystem
 from commands.shootercommands import ShooterCommands
 from commands.limelightcommands import LimelightCommands
 from commands.liftcommands import LiftCommands
+from commands.rotatetoobjectcommand import RotateToObjectCommand
 
 from pathplannerlib.auto import PathPlannerAuto
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.auto import NamedCommands
+
+
+
 
 
 class RobotContainer:
@@ -152,14 +159,14 @@ class RobotContainer:
         and then passing it to a JoystickButton.
         """
         def turn_to_object():
+            print(self.cameracommands.get_distance())
             x = self.camera.getX()
             print(f"x={x}")
-            turn_speed = -0.005 * x
-            self.robotDrive.drive(0,0, turn_speed,True, False)
+            turn_speed = -0.010 * x
+            self.robotDrive.rotate(turn_speed)
             # if you want your robot to slowly chase that object... replace this line above with: self.robotDrive.arcadeDrive(0.1, turn_speed)
 
-        backButton = self.driverController.button(wpilib.XboxController.Button.kBack)
-        backButton.onTrue(cmd.runOnce(lambda: print(self.cameracommands.get_distance())))
+
 
         def swaprelative():
             self.relative = not self.relative
@@ -203,6 +210,10 @@ class RobotContainer:
         self.driverController.a().onFalse(cmd.runOnce(lambda:self.Climb.Climb_stop()))
         self.driverController.b().onTrue(cmd.runOnce(lambda:self.Climb.Climb_set_speed(-.5)))
         self.driverController.b().onFalse(cmd.runOnce(lambda:self.Climb.Climb_stop()))
+
+        #Use X button to rotate robot to face april tag
+        xButton = self.driverController.x()
+        xButton.onTrue(RotateToObjectCommand(self.robotDrive, self.camera))
 
 
     def disablePIDSubsystems(self) -> None:
