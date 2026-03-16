@@ -10,48 +10,22 @@ from commands2.button import CommandXboxController
 class ShooterSubsystem(commands2.Subsystem):
     def __init__(self):
         super().__init__()
-        try:
-            # Initialize NEO motor
-            self.motor_1 = SparkMax(AuxConstants.Shooter_ID_1, type=SparkMax.MotorType.kBrushless)
-            self.motor_2 = SparkMax(AuxConstants.Shooter_ID_2, type=SparkMax.MotorType.kBrushless)
 
-            # Configure motor_1 (not inverted)
-            motor_1_config = SparkMaxConfig()
-            motor_1_config.inverted(False)
-            self.motor_1.configure(motor_1_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters)
+        # Initialize NEO motor
+        self.motor_1 = SparkMax(AuxConstants.Shooter_ID_1, SparkMax.MotorType.kBrushless)
+        self.motor_2 = SparkMax(AuxConstants.Shooter_ID_2, SparkMax.MotorType.kBrushless)
+        self.feeder = SparkMax(AuxConstants.Feeder_ID, SparkMax.MotorType.kBrushed)
 
-            # Configure motor_2 (inverted and follows motor_1)
-            motor_2_config = SparkMaxConfig()
-            motor_2_config.inverted(True)
-            motor_2_config.follow(self.motor_1)
-            self.motor_2.configure(motor_2_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters)
-
-            # Configure feeder motor
-            self.feeder = SparkMax(AuxConstants.Feeder_ID, type=SparkMax.MotorType.kBrushed)
-            feeder_config = SparkMaxConfig()
-            feeder_config.inverted(False)
-            self.feeder.configure(feeder_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters)
-            
-            print("ShooterSubsystem initialized successfully")
-        except Exception as e:
-            print(f"ERROR initializing ShooterSubsystem: {e}")
-            import traceback
-            traceback.print_exc()
-            # Set up dummy motors if initialization fails
-            self.motor_1 = None
-            self.motor_2 = None
-            self.feeder = None
 
     def Shooter_set_speed(self, speed):
-        if self.motor_1 is not None:
-            self.motor_1.set(speed)
+        self.motor_1.set(speed)
+        self.motor_2.set(-speed)
 
     def Shooter_stop(self):
         self.Shooter_set_speed(0)
 
     def Feeder_set_speed(self, speed):
-        if self.feeder is not None:
-            self.feeder.set(speed)
+        self.feeder.set(speed)
 
     def Feeder_stop(self):
         self.Feeder_set_speed(0)
