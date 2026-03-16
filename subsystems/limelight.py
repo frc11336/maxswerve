@@ -32,6 +32,13 @@ class LimelightCamera(Subsystem):
         self.lastHeartbeat = 0
         self.lastHeartbeatTime = 0
         self.heartbeating = False
+        
+        # Cache NetworkTables values to reduce blocking I/O
+        self.cached_tx = 0.0
+        self.cached_ty = 0.0
+        self.cached_ta = 0.0
+        self.cached_hb = 0
+        self.nt_read_counter = 0
 
     def setPipeline(self, index: int):
         self.pipelineIndexRequest.set(float(index))
@@ -40,16 +47,16 @@ class LimelightCamera(Subsystem):
         return int(self.pipelineIndex.get(-1))
 
     def getA(self) -> float:
-        return self.ta.get()
+        return self.cached_ta
 
     def getX(self) -> float:
-        return self.tx.get()
+        return self.cached_tx
 
     def getY(self) -> float:
-        return self.ty.get()
+        return self.cached_ty
 
     def getHB(self) -> float:
-        return self.hb.get()
+        return self.cached_hb
 
     def hasDetection(self):
         if self.getX() != 0.0 and self.heartbeating:
@@ -61,8 +68,20 @@ class LimelightCamera(Subsystem):
     def periodic(self) -> None:
         now = Timer.getFPGATimestamp()
         try:
+            # Only read from NetworkTables every 3 frames to reduce blocking I/O
+            # This caches all camera values: tx, ty, ta, hb
+            self.nt_read_counter += 1
+            if self.nt_read_counter >= 3:
+                self.cached_tx = self.tx.get()
+                self.cached_ty = self.ty.get()
+                self.cached_ta = self.ta.get()
+                self.cached_hb = self.hb.get()
+                # Debug: Show what we're reading from Limelight (uncomment to debug)
+                #print(f"[LIMELIGHT] Updated cache: tx={self.cached_tx:.2f}, ty={self.cached_ty:.2f}, ta={self.cached_ta:.2f}, hb={self.cached_hb}")
+                self.nt_read_counter = 0
+            
             # Use a try/except to handle network timeout gracefully
-            heartbeat = self.getHB()
+            heartbeat = self.cached_hb
             if heartbeat != self.lastHeartbeat:
                 self.lastHeartbeat = heartbeat
                 self.lastHeartbeatTime = now
@@ -70,7 +89,7 @@ class LimelightCamera(Subsystem):
             if heartbeating != self.heartbeating:
                 # Only print occasionally to avoid spamming console
                 if int(now * 2) % 2 == 0:  # Print once every 2 seconds
-                    print(f"Camera {self.cameraName} is " + ("UPDATING" if heartbeating else "NO LONGER UPDATING"))
+                    print(f"Camera {self.cameraName} is " + ("UPDATING" if heartbeating else "NO LONGER UPDATING") + f" (hb={heartbeat})")
             self.heartbeating = heartbeating
         except Exception as e:
             # Silently handle network errors to prevent blocking
