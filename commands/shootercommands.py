@@ -7,11 +7,13 @@ from constants import AuxConstants
 from rev import SparkMax, SparkMaxConfig
 from commands2.button import CommandXboxController
 import subsystems.shootersubsystem 
+
 # 1. Subsystem
 class ShooterCommands(commands2.Subsystem):
     def __init__(self, shooter):
         super().__init__()
         self.shooter = shooter
+
 
     def get_power(self, distance):
         power = (-0.0000037 * (distance ** 2)) + (0.0025 * distance) + 0.736

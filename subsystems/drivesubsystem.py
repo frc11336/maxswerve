@@ -41,149 +41,183 @@ class DriveSubsystem(Subsystem):
     def __init__(self) -> None:
         super().__init__()
 
-        # Create MAXSwerveModules
-        self.frontLeft = MAXSwerveModule(
-            DriveConstants.kFrontLeftDrivingCanId,
-            DriveConstants.kFrontLeftTurningCanId,
-            DriveConstants.kFrontLeftChassisAngularOffset,
-        )
-
-        self.frontRight = MAXSwerveModule(
-            DriveConstants.kFrontRightDrivingCanId,
-            DriveConstants.kFrontRightTurningCanId,
-            DriveConstants.kFrontRightChassisAngularOffset,
-        )
-
-        self.rearLeft = MAXSwerveModule(
-            DriveConstants.kRearLeftDrivingCanId,
-            DriveConstants.kRearLeftTurningCanId,
-            DriveConstants.kBackLeftChassisAngularOffset,
-        )
-
-        self.rearRight = MAXSwerveModule(
-            DriveConstants.kRearRightDrivingCanId,
-            DriveConstants.kRearRightTurningCanId,
-            DriveConstants.kBackRightChassisAngularOffset,
-        )
-
-        config = RobotConfig.fromGUISettings()
-
-        # The gyro sensor
         try:
-            self.gyro = navx.AHRS.create_spi()
-            print("NavX gyro initialized successfully")
-        except Exception as e:
-            print(f"WARNING: Failed to initialize NavX gyro: {e}")
-            # Create a dummy gyro that returns 0 for testing
-            self.gyro = None
+            print("Creating MAXSwerveModule - Front Left...")
+            # Create MAXSwerveModules
+            self.frontLeft = MAXSwerveModule(
+                DriveConstants.kFrontLeftDrivingCanId,
+                DriveConstants.kFrontLeftTurningCanId,
+                DriveConstants.kFrontLeftChassisAngularOffset,
+            )
 
-        # Print absolute encoder positions for all modules at startup
-        print("FL abs encoder:", self.frontLeft.turningEncoder.getPosition())
-        print("FR abs encoder:", self.frontRight.turningEncoder.getPosition())
-        print("RL abs encoder:", self.rearLeft.turningEncoder.getPosition())
-        print("RR abs encoder:", self.rearRight.turningEncoder.getPosition())
+            print("Creating MAXSwerveModule - Front Right...")
+            self.frontRight = MAXSwerveModule(
+                DriveConstants.kFrontRightDrivingCanId,
+                DriveConstants.kFrontRightTurningCanId,
+                DriveConstants.kFrontRightChassisAngularOffset,
+            )
 
-        # Slew rate filter variables for controlling lateral acceleration
-        self.currentRotation = 0.0
-        self.currentTranslationDir = 0.0
-        self.currentTranslationMag = 0.0
+            print("Creating MAXSwerveModule - Rear Left...")
+            self.rearLeft = MAXSwerveModule(
+                DriveConstants.kRearLeftDrivingCanId,
+                DriveConstants.kRearLeftTurningCanId,
+                DriveConstants.kBackLeftChassisAngularOffset,
+            )
 
-        self.magLimiter = SlewRateLimiter(DriveConstants.kMagnitudeSlewRate)
-        self.rotLimiter = SlewRateLimiter(DriveConstants.kRotationalSlewRate)
-        self.prevTime = wpilib.Timer.getFPGATimestamp()
+            print("Creating MAXSwerveModule - Rear Right...")
+            self.rearRight = MAXSwerveModule(
+                DriveConstants.kRearRightDrivingCanId,
+                DriveConstants.kRearRightTurningCanId,
+                DriveConstants.kBackRightChassisAngularOffset,
+            )
 
-        # Odometry class for tracking robot pose
-        self.odometry = SwerveDrive4Odometry(
-            DriveConstants.kDriveKinematics,
-            -(self.gyro.getRotation2d() if self.gyro is not None else Rotation2d()),
-            (
+            print("Loading RobotConfig from GUI settings...")
+            config = RobotConfig.fromGUISettings()
+
+            # The gyro sensor
+            try:
+                self.gyro = navx.AHRS.create_spi()
+                print("NavX gyro initialized successfully")
+            except Exception as e:
+                print(f"WARNING: Failed to initialize NavX gyro: {e}")
+                # Create a dummy gyro that returns 0 for testing
+                self.gyro = None
+
+            # Print absolute encoder positions for all modules at startup
+            print("FL abs encoder:", self.frontLeft.turningEncoder.getPosition())
+            print("FR abs encoder:", self.frontRight.turningEncoder.getPosition())
+            print("RL abs encoder:", self.rearLeft.turningEncoder.getPosition())
+            print("RR abs encoder:", self.rearRight.turningEncoder.getPosition())
+
+            # Slew rate filter variables for controlling lateral acceleration
+            self.currentRotation = 0.0
+            self.currentTranslationDir = 0.0
+            self.currentTranslationMag = 0.0
+
+            self.magLimiter = SlewRateLimiter(DriveConstants.kMagnitudeSlewRate)
+            self.rotLimiter = SlewRateLimiter(DriveConstants.kRotationalSlewRate)
+            self.prevTime = wpilib.Timer.getFPGATimestamp()
+
+            # Odometry class for tracking robot pose
+            print("Initializing SwerveDrive4Odometry...")
+            self.odometry = SwerveDrive4Odometry(
+                DriveConstants.kDriveKinematics,
+                -(self.gyro.getRotation2d() if self.gyro is not None else Rotation2d()),
+                (
+                    self.frontLeft.getPosition(),
+                    self.frontRight.getPosition(),
+                    self.rearLeft.getPosition(),
+                    self.rearRight.getPosition(),
+                ),
+            )
+
+            # Configure the AutoBuilder last
+            print("Configuring AutoBuilder...")
+            AutoBuilder.configure(
+                self.getPose, # Robot pose supplier
+                self.resetOdometry, # Method to reset odometry (will be called if your auto has a starting pose)
+                self.getRobotRelativeSpeeds, # ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+                self.driveRobotRelative, # Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also outputs individual module feedforwards
+                PPHolonomicDriveController(
+                    PIDConstants(7.5, 5.0, 0.0),  # Translation PID
+                    PIDConstants(7.5, 5.0, 0.0)   # Rotation PID
+                ), # PPHolonomicDriveController for swerve drives
+                config, # The robot configuration
+                self.shouldFlipPath, # Supplier to control path flipping based on alliance color
+                self # Reference to this subsystem to set requirements
+            )
+
+            # Create field visualization
+            print("Creating Field2d visualization...")
+            from wpilib import Field2d
+            self.field = Field2d()
+            SmartDashboard.putData("Field", self.field)
+            
+            # For testing max speed
+            self.testMode = False
+            
+            # Cache gyro angle to reduce NavX reads (can be slow/blocking)
+            self.cached_gyro_angle = 0.0
+            self.gyro_read_counter = 0
+            
+            # Cache module positions to reduce CAN reads (8 reads per frame = 400/sec!)
+            # Store both the position data and rotation data
+            self.cached_module_positions = [
                 self.frontLeft.getPosition(),
                 self.frontRight.getPosition(),
                 self.rearLeft.getPosition(),
                 self.rearRight.getPosition(),
-            ),
-        )
-
-        # Configure the AutoBuilder last
-        AutoBuilder.configure(
-            self.getPose, # Robot pose supplier
-            self.resetOdometry, # Method to reset odometry (will be called if your auto has a starting pose)
-            self.getRobotRelativeSpeeds, # ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-            self.driveRobotRelative, # Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also outputs individual module feedforwards
-            PPHolonomicDriveController(
-                PIDConstants(7.5, 5.0, 0.0),  # Translation PID
-                PIDConstants(7.5, 5.0, 0.0)   # Rotation PID
-            ), # PPHolonomicDriveController for swerve drives
-            config, # The robot configuration
-            self.shouldFlipPath, # Supplier to control path flipping based on alliance color
-            self # Reference to this subsystem to set requirements
-        )
-
-        # Create field visualization
-        from wpilib import Field2d
-        self.field = Field2d()
-        SmartDashboard.putData("Field", self.field)
-        
-        # For testing max speed
-        self.testMode = False
-
-   
+            ]
+            self.cached_gyro_rotation = Rotation2d()
+            self.odometry_update_counter = 0
+            
+            print("DriveSubsystem initialization complete!")
+        except Exception as e:
+            print(f"CRITICAL ERROR initializing DriveSubsystem (odometry/AutoBuilder): {e}")
+            import traceback
+            traceback.print_exc()
+            raise
 
     def periodic(self) -> None:
         # Update the odometry in the periodic block
-        if self.gyro is not None:
-            rotation = -self.gyro.getRotation2d()
-        else:
-            rotation = Rotation2d(0)
-            
-        self.odometry.update(
-            rotation,
-            (
+        # Cache gyro rotation AND module positions to avoid excessive CAN traffic
+        
+        # Update cached gyro rotation every 3 frames (instead of every frame)
+        self.gyro_read_counter += 1
+        if self.gyro_read_counter >= 3:
+            if self.gyro is not None:
+                self.cached_gyro_angle = self.gyro.getAngle()
+                self.cached_gyro_rotation = -self.gyro.getRotation2d()
+            else:
+                self.cached_gyro_rotation = Rotation2d(0)
+            self.gyro_read_counter = 0
+        
+        # Update cached module positions every 5 frames (CRITICAL: reduces CAN reads from 8/frame to <2/frame)
+        # This prevents the driver station communication dropout caused by excessive CAN traffic
+        self.odometry_update_counter += 1
+        if self.odometry_update_counter >= 5:
+            self.cached_module_positions = [
                 self.frontLeft.getPosition(),
                 self.frontRight.getPosition(),
                 self.rearLeft.getPosition(),
                 self.rearRight.getPosition(),
-            ))
+            ]
+            self.odometry_update_counter = 0
+        
+        # Update odometry using cached values (not blocking CAN reads)
+        self.odometry.update(
+            self.cached_gyro_rotation,
+            (
+                self.cached_module_positions[0],
+                self.cached_module_positions[1],
+                self.cached_module_positions[2],
+                self.cached_module_positions[3],
+            )
+        )
         
         
-        # Update field visualization
-        self.field.setRobotPose(self.odometry.getPose())
-        
-        # Publish pose to SmartDashboard for visualization
-        pose = self.odometry.getPose()
-        SmartDashboard.putNumber("Robot X", pose.X())
-        SmartDashboard.putNumber("Robot Y", pose.Y())
-        SmartDashboard.putNumber("Robot Angle", pose.rotation().degrees())
-        
-        # Publish actual measured speeds for testing
-        speeds = self.getRobotRelativeSpeeds()
-        SmartDashboard.putNumber("Measured Speed X", speeds.vx)
-        SmartDashboard.putNumber("Measured Speed Y", speeds.vy)
-        SmartDashboard.putNumber("Measured Speed Magnitude", math.sqrt(speeds.vx**2 + speeds.vy**2))
+        # Update field visualization - DISABLED due to blocking issues
+        # These SmartDashboard calls can block the main thread
+        # TODO: Consider using asynchronous updates or a separate thread
         """
-        # Log battery voltage
-        voltage = wpilib.RobotController.getBatteryVoltage()
-        print(f"Battery Voltage: {voltage:.2f}V")
-
-        # Log CAN status for each Spark Max
-        modules = [
-            ("FL", self.frontLeft),
-            ("FR", self.frontRight),
-            ("RL", self.rearLeft),
-            ("RR", self.rearRight),
-        ]
-        
-        for name, module in modules:
-            try:
-                drive_voltage = module.drivingSparkMax.getBusVoltage()
-                turn_voltage = module.turningSparkMax.getBusVoltage()
-                drive_faults = module.drivingSparkMax.getFaults()
-                turn_faults = module.turningSparkMax.getFaults()
-                print(f"{name} Drive: {drive_voltage:.2f}V, Faults: {drive_faults}")
-                print(f"{name} Turn: {turn_voltage:.2f}V, Faults: {turn_faults}")
-            except Exception as e:
-                print(f"{name} Error: {e}")
+        # Only update SmartDashboard ~10 times per second instead of 50 times per second
+        frame_count = int(wpilib.Timer.getFPGATimestamp() * 10) % 5
+        if frame_count == 0:
+            self.field.setRobotPose(self.odometry.getPose())
+            
+            # Publish pose to SmartDashboard for visualization
+            pose = self.odometry.getPose()
+            SmartDashboard.putNumber("Robot X", pose.X())
+            SmartDashboard.putNumber("Robot Y", pose.Y())
+            SmartDashboard.putNumber("Robot Angle", pose.rotation().degrees())
+            
+            # Publish actual measured speeds for testing
+            speeds = self.getRobotRelativeSpeeds()
+            SmartDashboard.putNumber("Measured Speed X", speeds.vx)
+            SmartDashboard.putNumber("Measured Speed Y", speeds.vy)
+            SmartDashboard.putNumber("Measured Speed Magnitude", math.sqrt(speeds.vx**2 + speeds.vy**2))
         """
+    
     def getPose(self) -> Pose2d:
         """Returns the currently-estimated pose of the robot.
 
@@ -307,7 +341,7 @@ class DriveSubsystem(Subsystem):
                 xSpeedDelivered,
                 ySpeedDelivered,
                 rotDelivered,
-                Rotation2d.fromDegrees(self.gyro.getAngle() if self.gyro else 0),
+                Rotation2d.fromDegrees(self.cached_gyro_angle),
             )
             if fieldRelative
             else ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered)

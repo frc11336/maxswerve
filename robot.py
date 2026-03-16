@@ -13,10 +13,24 @@ from robotcontainer import RobotContainer
 
 class MyRobot(commands2.TimedCommandRobot):
     def robotInit(self):
-        # Instantiate our RobotContainer.  This will perform all our button bindings, and put our
-        # autonomous chooser on the dashboard.
-        self.container = RobotContainer()
-        self.autonomousCommand = None
+        try:
+            print("=" * 60)
+            print("ROBOT INITIALIZATION STARTED")
+            print("=" * 60)
+            # Instantiate our RobotContainer.  This will perform all our button bindings, and put our
+            # autonomous chooser on the dashboard.
+            self.container = RobotContainer()
+            self.autonomousCommand = None
+            print("=" * 60)
+            print("ROBOT INITIALIZATION COMPLETE")
+            print("=" * 60)
+        except Exception as e:
+            print("=" * 60)
+            print(f"CRITICAL ERROR DURING ROBOT INITIALIZATION: {e}")
+            print("=" * 60)
+            import traceback
+            traceback.print_exc()
+            raise
         
 
     def autonomousInit(self) -> None:

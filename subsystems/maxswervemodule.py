@@ -23,6 +23,10 @@ class MAXSwerveModule:
 
         self.chassisAngularOffset = 0
         self.desiredState = SwerveModuleState(0.0, Rotation2d())
+        
+        # Cache turning encoder position to reduce CAN traffic
+        self.cached_turning_position = 0.0
+        self.encoder_read_counter = 0
 
         self.drivingSparkMax = SparkMax(drivingCANId, SparkMax.MotorType.kBrushless)
         
@@ -163,9 +167,15 @@ class MAXSwerveModule:
             self.chassisAngularOffset
         )
 
+        # Read encoder only every 5 frames to reduce CAN traffic that blocks the thread
+        self.encoder_read_counter += 1
+        if self.encoder_read_counter >= 5:
+            self.cached_turning_position = self.turningEncoder.getPosition()
+            self.encoder_read_counter = 0
+
         # Optimize the reference state to avoid spinning further than 90 degrees.
         SwerveModuleState.optimize(
-            correctedDesiredState, Rotation2d(self.turningEncoder.getPosition())
+            correctedDesiredState, Rotation2d(self.cached_turning_position)
         )
 
         # Command driving and turning SPARKS MAX towards their respective setpoints.

@@ -60,14 +60,21 @@ class LimelightCamera(Subsystem):
 
     def periodic(self) -> None:
         now = Timer.getFPGATimestamp()
-        heartbeat = self.getHB()
-        if heartbeat != self.lastHeartbeat:
-            self.lastHeartbeat = heartbeat
-            self.lastHeartbeatTime = now
-        heartbeating = now < self.lastHeartbeatTime + 5  # no heartbeat for 5s => stale camera
-        if heartbeating != self.heartbeating:
-            print(f"Camera {self.cameraName} is " + ("UPDATING" if heartbeating else "NO LONGER UPDATING"))
-        self.heartbeating = heartbeating
+        try:
+            # Use a try/except to handle network timeout gracefully
+            heartbeat = self.getHB()
+            if heartbeat != self.lastHeartbeat:
+                self.lastHeartbeat = heartbeat
+                self.lastHeartbeatTime = now
+            heartbeating = now < self.lastHeartbeatTime + 5  # no heartbeat for 5s => stale camera
+            if heartbeating != self.heartbeating:
+                # Only print occasionally to avoid spamming console
+                if int(now * 2) % 2 == 0:  # Print once every 2 seconds
+                    print(f"Camera {self.cameraName} is " + ("UPDATING" if heartbeating else "NO LONGER UPDATING"))
+            self.heartbeating = heartbeating
+        except Exception as e:
+            # Silently handle network errors to prevent blocking
+            pass
 
 
 def _fix_name(name: str):
