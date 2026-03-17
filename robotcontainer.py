@@ -117,7 +117,7 @@ class RobotContainer:
 
             print("Putting AutoChooser on SmartDashboard...")
             # Disabled SmartDashboard.putData due to blocking issues
-            # SmartDashboard.putData("Auto Chooser", self.autoChooser)
+            SmartDashboard.putData("Auto Chooser", self.autoChooser)
             
             print("Configuring button bindings...")
             # Configure the button bindings

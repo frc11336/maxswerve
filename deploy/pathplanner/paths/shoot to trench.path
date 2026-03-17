@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.5,
-        "y": 3.0
+        "x": 1.9625176056338036,
+        "y": 4.035
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.9760737546927352,
-        "y": 4.3061449016100175
+        "x": 1.4385913603265388,
+        "y": 5.341144901610018
       },
       "isLocked": false,
       "linkedName": "comp shooting"
@@ -48,7 +48,7 @@
   "folder": "multi-use",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

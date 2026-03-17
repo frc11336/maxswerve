@@ -48,7 +48,7 @@
   "folder": "multi-use",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 1.4688007143858497
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }
