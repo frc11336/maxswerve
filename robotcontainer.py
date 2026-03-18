@@ -191,12 +191,21 @@ class RobotContainer:
 
         def powerplus():
             self.power = round(self.power + 0.01, 2)
+            print (self.power)
 
         def powerminus():
             self.power = round(self.power - 0.01, 2)
+            print (self.power)
 
-        #self.driverController.y().onTrue(cmd.runOnce(lambda:distanceplus()))
-        #self.driverController.x().onTrue(cmd.runOnce(lambda:distanceminus()))
+        def getdistance():
+            self.distance = self.cameracommands.get_distance()
+            print (self.distance)
+        self.driverController.back().onTrue(cmd.runOnce(lambda:getdistance()))
+        
+        def shoot():
+            getdistance()
+            self.ShooterCommands.fire(self.distance)
+
 
         self.auxilaryController.y().onTrue(cmd.runOnce(lambda:powerplus()))
         self.auxilaryController.x().onTrue(cmd.runOnce(lambda:powerminus()))
@@ -208,8 +217,8 @@ class RobotContainer:
         self.auxilaryController.leftBumper().onTrue(cmd.runOnce(lambda:self.Intake.Intake_set_speed(self.intakespeed)))
         self.auxilaryController.leftBumper().onFalse(cmd.runOnce(lambda:self.Intake.Intake_stop()))
  
-        self.auxilaryController.a().onTrue(cmd.runOnce(lambda: self.ShooterCommands.fire_Power(self.power)))
-        #self.driverController.rightBumper().onTrue(cmd.runOnce(lambda: self.ShooterCommands.fire(self.distance)))
+        #self.auxilaryController.a().onTrue(cmd.runOnce(lambda: self.ShooterCommands.fire_Power(self.power)))
+        self.auxilaryController.a().onTrue(cmd.runOnce(lambda: shoot()))
         self.auxilaryController.a().onFalse(cmd.runOnce(lambda: self.Shooter.Shooter_kill()))
 
         self.driverController.a().onTrue(cmd.runOnce(lambda:self.Climb.Climb_set_speed(.5)))

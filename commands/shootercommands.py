@@ -16,14 +16,14 @@ class ShooterCommands(commands2.Subsystem):
 
 
     def get_power(self, distance):
-        power = (-0.0000037 * (distance ** 2)) + (0.0025 * distance) + 0.736
+        power = (0.00348612 * distance) + 0.328365
         return (power)
     
-    async def fire(self, distance):
+    def fire(self, distance):
         speed = self.get_power(distance)
         self.shooter.Shooter_set_speed(speed)
-        await asyncio.sleep(0.5)
-        self.shooter.Feeder_set_speed(1)
+        time.sleep(0.7)
+        self.shooter.Feeder_set_speed(.9)
     
     def fire_Power(self, Power):
         print ("activating")

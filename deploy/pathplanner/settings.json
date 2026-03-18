@@ -3,17 +3,19 @@
   "robotLength": 0.851,
   "holonomicMode": true,
   "pathFolders": [
-    "comp",
+    "New Folder",
     "bottom start",
     "center start",
+    "comp",
     "multi-use",
     "tests",
     "top start"
   ],
   "autoFolders": [
-    "comp",
+    "New Folder",
     "bottom start",
     "center start",
+    "comp",
     "multi-use",
     "tests",
     "top start"
