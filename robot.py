@@ -35,9 +35,15 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def autonomousInit(self) -> None:
         self.autonomousCommand = self.container.autoChooser.getSelected()
-        #self.autonomousCommand = self.container.getautocommand()
 
         if self.autonomousCommand:
+            # Reset odometry to the starting pose defined in the selected auto
+            # PathPlanner will also call resetOdometry() via AutoBuilder, but
+            # doing it here ensures the pose estimator is correct before the
+            # first command runs
+            starting_pose = self.autonomousCommand.getStartingPose() if hasattr(self.autonomousCommand, 'getStartingPose') else None
+            if starting_pose is not None:
+                self.container.robotDrive.resetOdometry(starting_pose)
             self.autonomousCommand.schedule()
 
     def teleopInit(self) -> None:

@@ -57,6 +57,10 @@ class LimelightCamera(Subsystem):
         self.nt_read_counter = 0
         self.yaw_write_counter = 0
 
+        # Track whether we have seeded odometry from vision yet
+        # Once seeded, subsequent updates only fuse (not hard-reset) the pose
+        self._odometry_seeded = False
+
     def setPipeline(self, index: int):
         self.pipelineIndexRequest.set(float(index))
 
@@ -82,6 +86,11 @@ class LimelightCamera(Subsystem):
     def getSecondsSinceLastHeartbeat(self) -> float:
         return Timer.getFPGATimestamp() - self.lastHeartbeatTime
 
+    def clearOdometrySeed(self) -> None:
+        """Call this to force a fresh vision seed on the next tag sighting.
+        Useful after PathPlanner resets odometry at the start of an auto."""
+        self._odometry_seeded = False
+
     def periodic(self) -> None:
         now = Timer.getFPGATimestamp()
         try:
@@ -106,15 +115,27 @@ class LimelightCamera(Subsystem):
                 # --- Feed MegaTag2 vision pose into the drive pose estimator ---
                 if self.drive is not None:
                     pose_data = self.botpose_wpiblue.get([])
-                    # botpose_orb_wpiblue has at least 7 elements:
-                    #   [x, y, z, roll, pitch, yaw, total_latency, ...]
-                    # Only trust the measurement when at least one tag is visible (ta > 0)
-                    if len(pose_data) >= 7 and self.cached_ta > 0:
-                        x, y, _z, _roll, _pitch, yaw_deg_pose, latency_ms = pose_data[:7]
-                        # Convert capture timestamp: now minus the pipeline latency
-                        capture_time = now - (latency_ms / 1000.0)
-                        vision_pose = Pose2d(x, y, Rotation2d.fromDegrees(yaw_deg_pose))
-                        self.drive.addVisionMeasurement(vision_pose, capture_time)
+                    # botpose_orb_wpiblue layout:
+                    #   [x, y, z, roll, pitch, yaw, total_latency, tagCount, ...]
+                    # Require at least 8 elements and at least 1 tag visible
+                    if len(pose_data) >= 8:
+                        x, y, _z, _roll, _pitch, yaw_deg_pose, latency_ms, tag_count = pose_data[:8]
+                        has_tags = int(tag_count) >= 1
+
+                        if has_tags:
+                            capture_time = now - (latency_ms / 1000.0)
+                            vision_pose = Pose2d(x, y, Rotation2d.fromDegrees(yaw_deg_pose))
+
+                            if not self._odometry_seeded:
+                                # First valid tag sighting — hard-reset odometry to the
+                                # vision pose so we start from a known field position
+                                self.drive.resetOdometry(vision_pose)
+                                self._odometry_seeded = True
+                                print(f"[LIMELIGHT] Seeded odometry from vision: ({x:.2f}, {y:.2f}, {yaw_deg_pose:.1f}°)")
+                            else:
+                                # Tags visible — fuse vision into wheel odometry
+                                self.drive.addVisionMeasurement(vision_pose, capture_time)
+                        # If has_tags is False, we do nothing — wheel odometry continues unmodified
 
             # --- Heartbeat monitoring ---
             heartbeat = self.cached_hb

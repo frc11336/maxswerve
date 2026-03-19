@@ -65,7 +65,7 @@ class DriveConstants:
     kFrontRightTurningCanId = 3
     kRearRightTurningCanId = 9
 
-    kGyroReversed = False
+    kGyroReversed = True
 
     
 
@@ -130,8 +130,8 @@ class OIConstants:
 
 
 class AutoConstants:
-    kMaxSpeedMetersPerSecond = 16
-    kMaxAccelerationMetersPerSecondSquared = 16
+    kMaxSpeedMetersPerSecond = 1
+    kMaxAccelerationMetersPerSecondSquared = 1
     kMaxAngularSpeedRadiansPerSecond = math.pi *2
     kMaxAngularSpeedRadiansPerSecondSquared = math.pi *2
 

@@ -111,7 +111,7 @@ class DriveSubsystem(Subsystem):
                     self.rearLeft.getPosition(),
                     self.rearRight.getPosition(),
                 ),
-                Pose2d(),
+                Pose2d(3.66, 4.04, Rotation2d.fromDegrees(-180)),
             )
 
             # Configure the AutoBuilder last
@@ -122,8 +122,8 @@ class DriveSubsystem(Subsystem):
                 self.getRobotRelativeSpeeds, # ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
                 self.driveRobotRelative, # Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also outputs individual module feedforwards
                 PPHolonomicDriveController(
-                    PIDConstants(7.5, 5.0, 0.0),  # Translation PID
-                    PIDConstants(7.5, 5.0, 0.0)   # Rotation PID
+                    PIDConstants(5.0, 0.0, 0.0),  # Translation PID
+                    PIDConstants(1.0, 0.0, 0.0)   # Rotation PID
                 ), # PPHolonomicDriveController for swerve drives
                 config, # The robot configuration
                 self.shouldFlipPath, # Supplier to control path flipping based on alliance color
@@ -153,6 +153,12 @@ class DriveSubsystem(Subsystem):
             ]
             self.cached_gyro_rotation = Rotation2d()
             self.odometry_update_counter = 0
+
+            # Telemetry counter for low-rate dashboard publishing
+            self.telemetry_counter = 0
+            # Track yaw at last zero to compute drift over time
+            self._yaw_at_last_zero = 0.0
+            self._time_at_last_zero = wpilib.Timer.getFPGATimestamp()
             
             print("DriveSubsystem initialization complete!")
         except Exception as e:
@@ -197,6 +203,38 @@ class DriveSubsystem(Subsystem):
                 self.cached_module_positions[3],
             )
         )
+
+        # --- Yaw drift diagnostics (published to Elastic Dashboard at ~5 Hz) ---
+        # Published every 10 frames to avoid excessive SmartDashboard traffic
+        self.telemetry_counter += 1
+        if self.telemetry_counter >= 10:
+            self.telemetry_counter = 0
+            if self.gyro is not None:
+                raw_yaw      = self.gyro.getAngle()          # cumulative, unbounded degrees
+                yaw_360      = raw_yaw % 360                 # 0-360
+                yaw_180      = self.gyro.getRotation2d().degrees()  # -180..180
+                turn_rate    = self.gyro.getRate()           # deg/s
+                is_cal       = self.gyro.isCalibrating()
+                is_connected = self.gyro.isConnected()
+
+                now = wpilib.Timer.getFPGATimestamp()
+                elapsed = now - self._time_at_last_zero
+                drift    = raw_yaw - self._yaw_at_last_zero  # total drift since last zero
+
+                SmartDashboard.putNumber("Gyro RawYaw deg",         raw_yaw)
+                SmartDashboard.putNumber("Gyro Yaw 0to360",          yaw_360)
+                SmartDashboard.putNumber("Gyro Yaw 180",             yaw_180)
+                SmartDashboard.putNumber("Gyro TurnRate degps",      turn_rate)
+                SmartDashboard.putNumber("Gyro DriftSinceZero deg",  drift)
+                SmartDashboard.putNumber("Gyro SecondsSinceZero",    elapsed)
+                SmartDashboard.putBoolean("Gyro IsCalibrating",      is_cal)
+                SmartDashboard.putBoolean("Gyro IsConnected",        is_connected)
+
+                # Estimated pose from the pose estimator (includes vision corrections)
+                pose = self.odometry.getEstimatedPosition()
+                SmartDashboard.putNumber("Odometry X m",             pose.X())
+                SmartDashboard.putNumber("Odometry Y m",             pose.Y())
+                SmartDashboard.putNumber("Odometry Heading deg",     pose.rotation().degrees())
         
         
         # Update field visualization - DISABLED due to blocking issues
@@ -235,7 +273,9 @@ class DriveSubsystem(Subsystem):
 
         """
         if self.gyro is not None:
-            angle = Rotation2d.fromDegrees(self.gyro.getAngle())
+            # Use negated rotation to match the CCW-positive convention used
+            # in periodic() when feeding the pose estimator
+            angle = -self.gyro.getRotation2d()
         else:
             angle = Rotation2d(0)
             
@@ -403,9 +443,11 @@ class DriveSubsystem(Subsystem):
             print(f"[DRIVE] addVisionMeasurement error: {e}")
 
     def zeroHeading(self) -> None:
-        """Zeroes the heading of the robot."""
+        """Zeroes the heading of the robot and resets the drift baseline."""
         if self.gyro:
             self.gyro.reset()
+            self._yaw_at_last_zero = 0.0
+            self._time_at_last_zero = wpilib.Timer.getFPGATimestamp()
 
     def getHeading(self) -> float:
         """Returns the heading of the robot.
