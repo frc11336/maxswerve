@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.588533094812165,
-        "y": 1.7553309481216455
+        "x": 1.8122898032200352,
+        "y": 5.925259391771019
       },
       "prevControl": null,
       "nextControl": {
-        "x": 8.195326078678246,
-        "y": 1.6240772611692373
+        "x": 1.244400715563506,
+        "y": 5.86035778175313
       },
       "isLocked": false,
-      "linkedName": "balls bottom"
+      "linkedName": "shot from left start"
     },
     {
       "anchor": {
-        "x": 3.575316901408451,
-        "y": 2.5339788732394366
+        "x": 1.065921288014311,
+        "y": 4.675903398926655
       },
       "prevControl": {
-        "x": 3.154940234077087,
-        "y": 2.622483650923156
+        "x": 1.065921288014311,
+        "y": 5.973935599284436
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "bottom start"
+      "linkedName": "climb from left"
     }
   ],
   "rotationTargets": [],
@@ -45,10 +45,10 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "bottom start",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -34.38034472384485
   },
   "useDefaultConstraints": true
 }

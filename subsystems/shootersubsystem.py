@@ -25,7 +25,7 @@ class ShooterSubsystem(commands2.Subsystem):
         self.Shooter_set_speed(0)
 
     def Feeder_set_speed(self, speed):
-        self.feeder.set(speed)
+        self.feeder.set(-speed)
 
     def Feeder_stop(self):
         self.Feeder_set_speed(0)

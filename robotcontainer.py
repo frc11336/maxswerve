@@ -82,15 +82,20 @@ class RobotContainer:
             print("Initializing LiftCommands...")
             self.ClimbCommands = LiftCommands(self.Climb)
 
+            def shoot():
+                self.distance = self.cameracommands.get_distance()
+                self.ShooterCommands.fire(self.distance)
+
+
             print("Registering NamedCommands...")
-            NamedCommands.registerCommand("spool", cmd.run(lambda: self.Shooter.Shooter_set_speed(.7)))
-            NamedCommands.registerCommand("feed", cmd.run(lambda: self.Shooter.Feeder_set_speed(1)))
-            NamedCommands.registerCommand("stopshoot", cmd.run(lambda: self.Shooter.Shooter_kill()))
-            NamedCommands.registerCommand("climb", cmd.run(lambda: self.Climb.Climb_set_speed(.5)))
-            NamedCommands.registerCommand("stopclimb", cmd.run(lambda: self.Climb.Climb_stop()))
-            NamedCommands.registerCommand("reverseclimb", cmd.run(lambda: self.Climb.Climb_set_speed(-.5)))
-            NamedCommands.registerCommand("intake", cmd.run(lambda: self.Intake.Intake_set_speed(1)))
-            NamedCommands.registerCommand("stopintake", cmd.run(lambda: self.Intake.Intake_stop()))
+            NamedCommands.registerCommand("spool", cmd.runOnce(lambda: shoot()))
+            NamedCommands.registerCommand("feed", cmd.runOnce(lambda: self.Shooter.Feeder_set_speed(1)))
+            NamedCommands.registerCommand("stopshoot", cmd.runOnce(lambda: self.Shooter.Shooter_kill()))
+            NamedCommands.registerCommand("climb", cmd.runOnce(lambda: self.Climb.Climb_set_speed(.5)))
+            NamedCommands.registerCommand("stopclimb", cmd.runOnce(lambda: self.Climb.Climb_stop()))
+            NamedCommands.registerCommand("reverseclimb", cmd.runOnce(lambda: self.Climb.Climb_set_speed(-.5)))
+            NamedCommands.registerCommand("intake", cmd.runOnce(lambda: self.Intake.Intake_set_speed(1)))
+            NamedCommands.registerCommand("stopintake", cmd.runOnce(lambda: self.Intake.Intake_stop()))
         
             print("Initializing controllers and camera...")
             # The driver's controller
@@ -102,7 +107,7 @@ class RobotContainer:
 
             # The robot's subsystems
             
-            self.camera = LimelightCamera("limelight")  # name of your camera goes in parentheses
+            self.camera = LimelightCamera("limelight", self.robotDrive)  # name of your camera goes in parentheses
             self.cameracommands = LimelightCommands(self.camera)
 
             self.relative = False
@@ -152,16 +157,6 @@ class RobotContainer:
             import traceback
             traceback.print_exc()
             raise
-    
-        
-    
-
-    def setupnamedcommand(self):
-        NamedCommands.registerCommand("spool", cmd.run(lambda: self.Shooter.Shooter_set_speed(.7)))
-        NamedCommands.registerCommand("feed", cmd.run(lambda: self.Shooter.Feeder_set_speed(1)))
-        NamedCommands.registerCommand("stopshoot", cmd.run(lambda: self.Shooter.Shooter_kill()))
-        NamedCommands.registerCommand("climb", cmd.run(lambda: self.Climb.Climb_set_speed(.5)))
-
 
     def getautonomouscommand(self):
         return self.autoChooser.getSelected()
@@ -200,7 +195,7 @@ class RobotContainer:
         def getdistance():
             self.distance = self.cameracommands.get_distance()
             print (self.distance)
-        self.driverController.back().onTrue(cmd.runOnce(lambda:getdistance()))
+        self.auxilaryController.back().onTrue(cmd.runOnce(lambda:getdistance()))
         
         def shoot():
             getdistance()
@@ -211,18 +206,18 @@ class RobotContainer:
         self.auxilaryController.x().onTrue(cmd.runOnce(lambda:powerminus()))
 
         self.auxilaryController.start().onTrue(cmd.runOnce(lambda: self.robotDrive.resetOdometry))
-        self.auxilaryController.rightBumper().onTrue(cmd.runOnce(lambda:self.Intake.Intake_set_speed(-self.intakespeed)))
-        self.auxilaryController.rightBumper().onFalse(cmd.runOnce(lambda:self.Intake.Intake_stop()))
+        self.driverController.rightBumper().onTrue(cmd.runOnce(lambda:self.Intake.Intake_set_speed(-self.intakespeed)))
+        self.driverController.rightBumper().onFalse(cmd.runOnce(lambda:self.Intake.Intake_stop()))
 
-        self.auxilaryController.leftBumper().onTrue(cmd.runOnce(lambda:self.Intake.Intake_set_speed(self.intakespeed)))
-        self.auxilaryController.leftBumper().onFalse(cmd.runOnce(lambda:self.Intake.Intake_stop()))
+        self.driverController.leftBumper().onTrue(cmd.runOnce(lambda:self.Intake.Intake_set_speed(self.intakespeed)))
+        self.driverController.leftBumper().onFalse(cmd.runOnce(lambda:self.Intake.Intake_stop()))
  
         #self.auxilaryController.a().onTrue(cmd.runOnce(lambda: self.ShooterCommands.fire_Power(self.power)))
-        self.auxilaryController.a().onTrue(cmd.runOnce(lambda: shoot()))
-        self.auxilaryController.a().onFalse(cmd.runOnce(lambda: self.Shooter.Shooter_kill()))
+        self.driverController.a().onTrue(cmd.runOnce(lambda: shoot()))
+        self.driverController.a().onFalse(cmd.runOnce(lambda: self.Shooter.Shooter_kill()))
 
-        self.driverController.a().onTrue(cmd.runOnce(lambda:self.Climb.Climb_set_speed(.5)))
-        self.driverController.a().onFalse(cmd.runOnce(lambda:self.Climb.Climb_stop()))
+        self.driverController.y().onTrue(cmd.runOnce(lambda:self.Climb.Climb_set_speed(.5)))
+        self.driverController.y().onFalse(cmd.runOnce(lambda:self.Climb.Climb_stop()))
         self.driverController.b().onTrue(cmd.runOnce(lambda:self.Climb.Climb_set_speed(-.5)))
         self.driverController.b().onFalse(cmd.runOnce(lambda:self.Climb.Climb_stop()))
 

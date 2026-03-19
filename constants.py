@@ -26,7 +26,7 @@ class NeoMotorConstants:
 class DriveConstants:
     # Driving Parameters - Note that these are not the maximum capable speeds of
     # the robot, rather the allowed maximum speeds
-    kMaxSpeedMetersPerSecond = 64
+    kMaxSpeedMetersPerSecond = 16
     kMaxAngularSpeed = math.tau * 2 # radians per second
 
 
@@ -65,7 +65,7 @@ class DriveConstants:
     kFrontRightTurningCanId = 3
     kRearRightTurningCanId = 9
 
-    kGyroReversed = True
+    kGyroReversed = False
 
     
 
@@ -74,7 +74,7 @@ class ModuleConstants:
     # The MAXSwerve module can be configured with one of three pinion gears: 12T, 13T, or 14T.
     # This changes the drive speed of the module (a pinion gear with more teeth will result in a
     # robot that drives faster).
-    kDrivingMotorPinionTeeth = 14
+    kDrivingMotorPinionTeeth = 10.5
 
     # Invert the turning encoder, since the output shaft rotates in the opposite direction of
     # the steering motor in the MAXSwerve Module.

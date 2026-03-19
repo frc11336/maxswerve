@@ -3,22 +3,14 @@
   "robotLength": 0.851,
   "holonomicMode": true,
   "pathFolders": [
-    "New Folder",
-    "bottom start",
-    "center start",
     "comp",
     "multi-use",
-    "tests",
-    "top start"
+    "tests"
   ],
   "autoFolders": [
-    "New Folder",
-    "bottom start",
-    "center start",
     "comp",
-    "multi-use",
-    "tests",
-    "top start"
+    "simple shoot climb",
+    "tests"
   ],
   "defaultMaxVel": 3.0,
   "defaultMaxAccel": 3.0,

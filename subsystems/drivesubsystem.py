@@ -26,6 +26,7 @@ from wpimath.kinematics import (
     SwerveDrive4Kinematics,
     SwerveDrive4Odometry,
 )
+from wpimath.estimator import SwerveDrive4PoseEstimator
 
 from constants import DriveConstants
 import swerveutils
@@ -99,8 +100,9 @@ class DriveSubsystem(Subsystem):
             self.prevTime = wpilib.Timer.getFPGATimestamp()
 
             # Odometry class for tracking robot pose
-            print("Initializing SwerveDrive4Odometry...")
-            self.odometry = SwerveDrive4Odometry(
+            # Using SwerveDrive4PoseEstimator so vision measurements can be fused in
+            print("Initializing SwerveDrive4PoseEstimator...")
+            self.odometry = SwerveDrive4PoseEstimator(
                 DriveConstants.kDriveKinematics,
                 -(self.gyro.getRotation2d() if self.gyro is not None else Rotation2d()),
                 (
@@ -109,6 +111,7 @@ class DriveSubsystem(Subsystem):
                     self.rearLeft.getPosition(),
                     self.rearRight.getPosition(),
                 ),
+                Pose2d(),
             )
 
             # Configure the AutoBuilder last
@@ -223,7 +226,7 @@ class DriveSubsystem(Subsystem):
 
         :returns: The pose.
         """
-        return self.odometry.getPose()
+        return self.odometry.getEstimatedPosition()
 
     def resetOdometry(self, pose: Pose2d) -> None:
         """Resets the odometry to the specified pose.
@@ -386,6 +389,18 @@ class DriveSubsystem(Subsystem):
         self.rearLeft.resetEncoders()
         self.frontRight.resetEncoders()
         self.rearRight.resetEncoders()
+
+    def addVisionMeasurement(self, pose: Pose2d, timestamp: float) -> None:
+        """Feed a vision pose estimate into the pose estimator.
+
+        :param pose:      The field-relative pose measured by the camera.
+        :param timestamp: The FPGA timestamp (seconds) at which the image was captured.
+                          Use the value returned by the Limelight helper, NOT getFPGATimestamp().
+        """
+        try:
+            self.odometry.addVisionMeasurement(pose, timestamp)
+        except Exception as e:
+            print(f"[DRIVE] addVisionMeasurement error: {e}")
 
     def zeroHeading(self) -> None:
         """Zeroes the heading of the robot."""

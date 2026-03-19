@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "intake jiggle forward"
+            "pathName": "left to shoot"
           }
         },
         {
-          "type": "path",
+          "type": "wait",
           "data": {
-            "pathName": "intake jiggle backward"
+            "waitTime": 0.1
           }
         },
         {
@@ -59,11 +59,35 @@
           "data": {
             "name": "stopshoot"
           }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.1
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "shoot to climb"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.1
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "climb"
+          }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "tests",
+  "folder": "simple shoot climb",
   "choreoAuto": false
 }

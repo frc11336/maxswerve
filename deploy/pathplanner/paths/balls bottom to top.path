@@ -12,7 +12,7 @@
         "y": 4.18483129081062
       },
       "isLocked": false,
-      "linkedName": "balls bottom"
+      "linkedName": null
     },
     {
       "anchor": {
@@ -25,7 +25,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "balls top"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
