@@ -99,7 +99,7 @@ class LimelightCamera(Subsystem):
             # We write every frame (cheap NT publish) rather than caching, because
             # a stale yaw degrades MegaTag2 accuracy more than the small NT overhead.
             if self.drive is not None:
-                yaw_deg = self.drive.getHeading()  # degrees, -180..180
+                yaw_deg = self.drive.getRawYaw()  # NavX CW-positive yaw — matches Limelight's convention
                 # Format: [yaw, yawRate, pitch, pitchRate, roll, rollRate]
                 self.robot_orientation_pub.set([yaw_deg, 0.0, 0.0, 0.0, 0.0, 0.0])
 

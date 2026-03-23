@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Reverse Meter"
+            "pathName": "center reverse"
           }
         }
       ]
     }
   },
-  "resetOdom": true,
+  "resetOdom": false,
   "folder": "tests",
   "choreoAuto": false
 }

@@ -22,7 +22,7 @@ class ShooterCommands(commands2.Subsystem):
     def fire(self, distance):
         speed = self.get_power(distance)
         self.shooter.Shooter_set_speed(speed)
-        time.sleep(0.7)
+        time.sleep(1)
         self.shooter.Feeder_set_speed(.9)
     
     def fire_Power(self, Power):

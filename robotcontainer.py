@@ -44,6 +44,7 @@ from commands.shootercommands import ShooterCommands
 from commands.limelightcommands import LimelightCommands
 from commands.liftcommands import LiftCommands
 from commands.rotatetoobjectcommand import RotateToObjectCommand
+from commands.aimathubcommand import AimAtHubCommand, distance_to_nearest_hub
 
 from pathplannerlib.auto import PathPlannerAuto
 from pathplannerlib.auto import AutoBuilder
@@ -101,7 +102,7 @@ class RobotContainer:
             # The driver's controller
             # Using commands2 instead of wpilib
             #self.driverController = wpilib.XboxController(OIConstants.kDriverControllerPort)
-            self.distance = 50
+            self.distance = 50  # fallback; overwritten by get_hub_distance() at shoot time
             self.power = 0.75
             self.intakespeed = 1
 
@@ -193,8 +194,14 @@ class RobotContainer:
             print (self.power)
 
         def getdistance():
-            self.distance = self.cameracommands.get_distance()
-            print (self.distance)
+            # Try odometry-based hub distance first (metres → inches)
+            try:
+                dist_m = distance_to_nearest_hub(self.robotDrive.getPose())
+                self.distance = dist_m * 39.3701  # convert metres to inches
+            except Exception:
+                # Fall back to limelight distance if odometry unavailable
+                self.distance = self.cameracommands.get_distance()
+            print(f"distance={self.distance:.1f} in")
         self.auxilaryController.back().onTrue(cmd.runOnce(lambda:getdistance()))
         
         def shoot():
@@ -202,8 +209,8 @@ class RobotContainer:
             self.ShooterCommands.fire(self.distance)
 
 
-        self.auxilaryController.y().onTrue(cmd.runOnce(lambda:powerplus()))
-        self.auxilaryController.x().onTrue(cmd.runOnce(lambda:powerminus()))
+        #self.auxilaryController.y().onTrue(cmd.runOnce(lambda:powerplus()))
+        #self.auxilaryController.x().onTrue(cmd.runOnce(lambda:powerminus()))
 
         self.auxilaryController.start().onTrue(cmd.runOnce(lambda: self.robotDrive.resetOdometry))
         self.driverController.rightBumper().onTrue(cmd.runOnce(lambda:self.Intake.Intake_set_speed(-self.intakespeed)))
@@ -221,9 +228,11 @@ class RobotContainer:
         self.driverController.b().onTrue(cmd.runOnce(lambda:self.Climb.Climb_set_speed(-.5)))
         self.driverController.b().onFalse(cmd.runOnce(lambda:self.Climb.Climb_stop()))
 
-        #Use X button to rotate robot to face april tag
-        xButton = self.driverController.x()
-        xButton.onTrue(RotateToObjectCommand(self.robotDrive, self.camera))
+        #Use X button to aim robot front toward nearest scoring hub
+        self.driverController.x().onTrue(AimAtHubCommand(self.robotDrive))
+
+        # Left stick button (L3) — rotate robot to face april tag
+        self.driverController.leftStick().onTrue(RotateToObjectCommand(self.robotDrive, self.camera))
 
     
 

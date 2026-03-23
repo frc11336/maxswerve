@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "One Meter F"
+            "pathName": "center forward"
           }
         }
       ]
     }
   },
-  "resetOdom": true,
-  "folder": "tests",
+  "resetOdom": false,
+  "folder": null,
   "choreoAuto": false
 }

@@ -7,25 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "balls top to bottom"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
+            "pathName": "One Meter F"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "balls bottom to top"
+            "pathName": "One Meter R"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "tests",
   "choreoAuto": false
 }

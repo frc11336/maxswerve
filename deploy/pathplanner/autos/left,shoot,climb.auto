@@ -87,7 +87,7 @@
       ]
     }
   },
-  "resetOdom": true,
+  "resetOdom": false,
   "folder": "simple shoot climb",
   "choreoAuto": false
 }

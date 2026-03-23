@@ -104,14 +104,14 @@ class DriveSubsystem(Subsystem):
             print("Initializing SwerveDrive4PoseEstimator...")
             self.odometry = SwerveDrive4PoseEstimator(
                 DriveConstants.kDriveKinematics,
-                -(self.gyro.getRotation2d() if self.gyro is not None else Rotation2d()),
+                Rotation2d.fromDegrees(-self.gyro.getAngle()) if self.gyro is not None else Rotation2d(),
                 (
                     self.frontLeft.getPosition(),
                     self.frontRight.getPosition(),
                     self.rearLeft.getPosition(),
                     self.rearRight.getPosition(),
                 ),
-                Pose2d(3.66, 4.04, Rotation2d.fromDegrees(-180)),
+                Pose2d(3.66, 4.04, Rotation2d.fromDegrees(0)),
             )
 
             # Configure the AutoBuilder last
@@ -122,8 +122,8 @@ class DriveSubsystem(Subsystem):
                 self.getRobotRelativeSpeeds, # ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
                 self.driveRobotRelative, # Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also outputs individual module feedforwards
                 PPHolonomicDriveController(
-                    PIDConstants(5.0, 0.0, 0.0),  # Translation PID
-                    PIDConstants(1.0, 0.0, 0.0)   # Rotation PID
+                    PIDConstants(4.7, 0.0, 1),  # Translation PID
+                    PIDConstants(9.5, 0.0, 0.0)   # Rotation PID
                 ), # PPHolonomicDriveController for swerve drives
                 config, # The robot configuration
                 self.shouldFlipPath, # Supplier to control path flipping based on alliance color
@@ -167,6 +167,8 @@ class DriveSubsystem(Subsystem):
             traceback.print_exc()
             raise
 
+        
+
     def periodic(self) -> None:
         # Update the odometry in the periodic block
         # Cache gyro rotation AND module positions to avoid excessive CAN traffic
@@ -175,8 +177,8 @@ class DriveSubsystem(Subsystem):
         self.gyro_read_counter += 1
         if self.gyro_read_counter >= 3:
             if self.gyro is not None:
-                self.cached_gyro_angle = self.gyro.getAngle()
-                self.cached_gyro_rotation = -self.gyro.getRotation2d()
+                self.cached_gyro_angle = -self.gyro.getAngle()
+                self.cached_gyro_rotation = Rotation2d.fromDegrees(-self.gyro.getAngle())
             else:
                 self.cached_gyro_rotation = Rotation2d(0)
             self.gyro_read_counter = 0
@@ -210,9 +212,9 @@ class DriveSubsystem(Subsystem):
         if self.telemetry_counter >= 10:
             self.telemetry_counter = 0
             if self.gyro is not None:
-                raw_yaw      = self.gyro.getAngle()          # cumulative, unbounded degrees
+                raw_yaw      = -self.gyro.getAngle()         # cumulative, unbounded degrees (negated)
                 yaw_360      = raw_yaw % 360                 # 0-360
-                yaw_180      = self.gyro.getRotation2d().degrees()  # -180..180
+                yaw_180      = float(self.gyro.getYaw())     # direct ±180° from NavX AHRS
                 turn_rate    = self.gyro.getRate()           # deg/s
                 is_cal       = self.gyro.isCalibrating()
                 is_connected = self.gyro.isConnected()
@@ -227,7 +229,7 @@ class DriveSubsystem(Subsystem):
                 SmartDashboard.putNumber("Gyro TurnRate degps",      turn_rate)
                 SmartDashboard.putNumber("Gyro DriftSinceZero deg",  drift)
                 SmartDashboard.putNumber("Gyro SecondsSinceZero",    elapsed)
-                SmartDashboard.putBoolean("Gyro IsCalibrating",      is_cal)
+                SmartDashboard.putBoolean("Gyro Was Calibrating",      is_cal)
                 SmartDashboard.putBoolean("Gyro IsConnected",        is_connected)
 
                 # Estimated pose from the pose estimator (includes vision corrections)
@@ -273,9 +275,7 @@ class DriveSubsystem(Subsystem):
 
         """
         if self.gyro is not None:
-            # Use negated rotation to match the CCW-positive convention used
-            # in periodic() when feeding the pose estimator
-            angle = -self.gyro.getRotation2d()
+            angle = Rotation2d.fromDegrees(-self.gyro.getAngle())
         else:
             angle = Rotation2d(0)
             
@@ -450,12 +450,24 @@ class DriveSubsystem(Subsystem):
             self._time_at_last_zero = wpilib.Timer.getFPGATimestamp()
 
     def getHeading(self) -> float:
-        """Returns the heading of the robot.
+        """Returns the heading of the robot in WPILib convention (CCW-positive).
 
         :returns: the robot's heading in degrees, from -180 to 180
         """
         if self.gyro:
-            return Rotation2d.fromDegrees(self.gyro.getAngle()).degrees()
+            return -Rotation2d.fromDegrees(self.gyro.getAngle()).degrees()
+        return 0.0
+
+    def getRawYaw(self) -> float:
+        """Returns the raw NavX yaw in the NavX's native convention (CW-positive).
+
+        Use this when feeding yaw to the Limelight for MegaTag2 — Limelight expects
+        the same CW-positive convention as the NavX, NOT the WPILib CCW-positive convention.
+
+        :returns: yaw in degrees, -180 to 180
+        """
+        if self.gyro:
+            return float(self.gyro.getYaw())
         return 0.0
 
     def getTurnRate(self) -> float:
