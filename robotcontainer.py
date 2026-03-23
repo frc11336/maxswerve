@@ -85,7 +85,7 @@ class RobotContainer:
 
             def shoot():
                 self.distance = self.cameracommands.get_distance()
-                self.ShooterCommands.fire(self.distance)
+                self.ShooterCommands.fire(self.distance, self.poweroffset)
 
 
             print("Registering NamedCommands...")
@@ -103,8 +103,12 @@ class RobotContainer:
             # Using commands2 instead of wpilib
             #self.driverController = wpilib.XboxController(OIConstants.kDriverControllerPort)
             self.distance = 50  # fallback; overwritten by get_hub_distance() at shoot time
-            self.power = 0.75
+            self.poweroffset = 0
             self.intakespeed = 1
+
+ 
+            SmartDashboard.putNumber("Power Offset", self.poweroffset)
+
 
             # The robot's subsystems
             
@@ -186,12 +190,12 @@ class RobotContainer:
             self.distance = round(self.distance - 1)
 
         def powerplus():
-            self.power = round(self.power + 0.01, 2)
-            print (self.power)
+            self.poweroffset = round(self.poweroffset + 0.01, 2)
+            print (self.poweroffset)
 
         def powerminus():
-            self.power = round(self.power - 0.01, 2)
-            print (self.power)
+            self.poweroffset = round(self.poweroffset - 0.01, 2)
+            print (self.poweroffset)
 
         def getdistance():
             # Try odometry-based hub distance first (metres → inches)
@@ -206,13 +210,13 @@ class RobotContainer:
         
         def shoot():
             getdistance()
-            self.ShooterCommands.fire(self.distance)
+            self.ShooterCommands.fire(self.distance, self.poweroffset)
 
 
-        #self.auxilaryController.y().onTrue(cmd.runOnce(lambda:powerplus()))
-        #self.auxilaryController.x().onTrue(cmd.runOnce(lambda:powerminus()))
+        self.auxilaryController.y().onTrue(cmd.runOnce(lambda:powerplus()))
+        self.auxilaryController.x().onTrue(cmd.runOnce(lambda:powerminus()))
 
-        self.auxilaryController.start().onTrue(cmd.runOnce(lambda: self.robotDrive.resetOdometry))
+        #self.auxilaryController.start().onTrue(cmd.runOnce(lambda: self.robotDrive.resetOdometry))
         self.driverController.rightBumper().onTrue(cmd.runOnce(lambda:self.Intake.Intake_set_speed(-self.intakespeed)))
         self.driverController.rightBumper().onFalse(cmd.runOnce(lambda:self.Intake.Intake_stop()))
 
@@ -233,6 +237,8 @@ class RobotContainer:
 
         # Left stick button (L3) — rotate robot to face april tag
         self.driverController.leftStick().onTrue(RotateToObjectCommand(self.robotDrive, self.camera))
+
+        self.driverController.rightStick().onTrue(cmd.runOnce(lambda: self.ShooterCommands.fire_Power(1)))
 
     
 

@@ -19,8 +19,8 @@ class ShooterCommands(commands2.Subsystem):
         power = (0.00348612 * distance) + 0.328365
         return (power)
     
-    def fire(self, distance):
-        speed = self.get_power(distance)
+    def fire(self, distance, poweroffset):
+        speed = self.get_power(distance) + poweroffset
         self.shooter.Shooter_set_speed(speed)
         time.sleep(1)
         self.shooter.Feeder_set_speed(.9)
