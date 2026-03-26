@@ -28,6 +28,6 @@ class ShooterCommands(commands2.Subsystem):
     def fire_Power(self, Power):
         print ("activating")
         self.shooter.Shooter_set_speed(Power)
-        time.sleep(0.5)
-        self.shooter.Feeder_set_speed(1)
+        time.sleep(1)
+        self.shooter.Feeder_set_speed(.7)
         

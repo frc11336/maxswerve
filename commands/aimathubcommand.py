@@ -36,7 +36,7 @@ class AimAtHubCommand(commands2.Command):
     ROTATION_GAIN           = 0.025 # output per degree of error
     COMMAND_TIMEOUT         = 5.0   # seconds
 
-    def __init__(self, drive: DriveSubsystem):
+    def __init__(self, drive):
         super().__init__()
         self.drive = drive
         self.addRequirements(drive)
@@ -45,7 +45,8 @@ class AimAtHubCommand(commands2.Command):
         self.frame_counter = 0
 
     # ------------------------------------------------------------------
-    def initialize(self):
+    def initialize(self, drive):
+        self.drive = drive
         self.start_time    = wpilib.Timer.getFPGATimestamp()
         self.frame_counter = 0
         pose = self.drive.getPose()
@@ -54,7 +55,8 @@ class AimAtHubCommand(commands2.Command):
         print(f"[AIM] Started — hub=({hub.X():.2f},{hub.Y():.2f}), dist={dist:.2f}m")
 
     # ------------------------------------------------------------------
-    def execute(self):
+    def execute(self, drive):
+        self.drive = drive
         try:
             self.frame_counter += 1
             pose = self.drive.getPose()
@@ -122,3 +124,8 @@ class AimAtHubCommand(commands2.Command):
         except Exception as e:
             print(f"[AIM] Error in isFinished(): {e}")
             return True
+    def aim(self, drive):
+        self.drive
+        self.initialize(self.drive)
+        self.execute(self.drive)
+        self.isFinished()

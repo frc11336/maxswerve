@@ -12,7 +12,9 @@ class ShooterSubsystem(commands2.Subsystem):
         super().__init__()
 
         self.shooteron = False
-        self.intakeon = False
+        self.feederon = False
+        wpilib.SmartDashboard.putBoolean("Shooter On", self.shooteron)
+        wpilib.SmartDashboard.putBoolean("Feeder On", self.feederon)
 
         # Initialize NEO motor
         self.motor_1 = SparkMax(AuxConstants.Shooter_ID_1, SparkMax.MotorType.kBrushless)

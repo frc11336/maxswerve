@@ -13,6 +13,8 @@ class IntakeSubsystem(commands2.Subsystem):
         try:
             # Initialize NEO motor
             self.Intake = SparkMax(AuxConstants.Intake_ID, type=SparkMax.MotorType.kBrushless)
+            self.intakeon = False
+            wpilib.SmartDashboard.putBoolean("Intake On", self.intakeon)
             
             # Configure intake motor
             intake_config = SparkMaxConfig()
@@ -30,6 +32,8 @@ class IntakeSubsystem(commands2.Subsystem):
     def Intake_set_speed(self, speed):
         if self.Intake is not None:
             self.Intake.set(-speed)
+            self.intakeon = speed != 0
+            wpilib.SmartDashboard.putBoolean("Intake On", self.intakeon)
 
     def Intake_stop(self):
         self.Intake_set_speed(0)
