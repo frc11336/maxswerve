@@ -33,6 +33,14 @@ class MyRobot(commands2.TimedCommandRobot):
             raise
         
 
+    def robotPeriodic(self) -> None:
+        # Keep distance-to-hub current every loop cycle (~50Hz)
+        # This means self.container.distance is always up to date for shooting
+        try:
+            self.container.updateDistance()
+        except Exception:
+            pass
+
     def autonomousInit(self) -> None:
         self.autonomousCommand = self.container.autoChooser.getSelected()
 

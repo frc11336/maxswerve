@@ -87,7 +87,7 @@ class RobotContainer:
 
             def shoot():
                 self.distance = self.cameracommands.get_distance()
-                self.ShooterCommands.fire(self.distance, self.poweroffset)
+                self.ShooterCommands.fire(self.distance)
 
 
             print("Registering NamedCommands...")
@@ -105,8 +105,8 @@ class RobotContainer:
             # Using commands2 instead of wpilib
             #self.driverController = wpilib.XboxController(OIConstants.kDriverControllerPort)
             self.distance = 50  # fallback; overwritten by get_hub_distance() at shoot time
-            self.poweroffset = 0.75
-            self.intakespeed = 1
+            self.poweroffset = 0
+            self.intakespeed = .75
 
  
             SmartDashboard.putNumber("Power Offset", self.poweroffset)
@@ -169,6 +169,16 @@ class RobotContainer:
     def getautonomouscommand(self):
         return self.autoChooser.getSelected()
 
+    def updateDistance(self) -> None:
+        """Recalculate distance to nearest hub from odometry and publish to SmartDashboard.
+        Called periodically from robot.py so the value stays current every loop."""
+        try:
+            dist_m = distance_to_nearest_hub(self.robotDrive.getPose())
+            self.distance = dist_m * 39.3701  # metres → inches
+        except Exception:
+            self.distance = self.cameracommands.get_distance()
+        SmartDashboard.putNumber("Distance to Hub (in)", self.distance)
+
     def configureButtonBindings(self) -> None:
         """
         Use this method to define your button->command mappings. Buttons can be created by
@@ -204,18 +214,10 @@ class RobotContainer:
             SmartDashboard.putNumber("Power Offset", self.poweroffset)
 
         def getdistance():
-            # Try odometry-based hub distance first (metres → inches)
-            try:
-                dist_m = distance_to_nearest_hub(self.robotDrive.getPose())
-                self.distance = dist_m * 39.3701  # convert metres to inches
-            except Exception:
-                # Fall back to limelight distance if odometry unavailable
-                self.distance = self.cameracommands.get_distance()
-            print(f"distance={self.distance:.1f} in")
+            self.updateDistance()
         self.auxilaryController.back().onTrue(cmd.runOnce(lambda:getdistance()))
         
         def shoot():
-            getdistance()
             self.ShooterCommands.fire(self.distance, self.poweroffset)
 
 
@@ -229,8 +231,8 @@ class RobotContainer:
         self.driverController.leftBumper().onTrue(cmd.runOnce(lambda:self.Intake.Intake_set_speed(self.intakespeed)))
         self.driverController.leftBumper().onFalse(cmd.runOnce(lambda:self.Intake.Intake_stop()))
  
-        self.auxilaryController.a().onTrue(cmd.runOnce(lambda: self.ShooterCommands.fire_Power(self.poweroffset)))
-        #self.driverController.a().onTrue(cmd.runOnce(lambda: shoot()))
+        #self.driverController.a().onTrue(cmd.runOnce(lambda: self.ShooterCommands.fire_Power(self.poweroffset)))
+        self.driverController.a().onTrue(cmd.runOnce(lambda: shoot()))
         self.driverController.a().onFalse(cmd.runOnce(lambda: self.Shooter.Shooter_kill()))
 
         self.driverController.y().onTrue(cmd.runOnce(lambda:self.Climb.Climb_set_speed(.5)))
@@ -239,7 +241,7 @@ class RobotContainer:
         self.driverController.b().onFalse(cmd.runOnce(lambda:self.Climb.Climb_stop()))
 
         #Use X button to aim robot front toward nearest scoring hub
-        self.driverController.x().onTrue(cmd.runOnce(lambda: self.aimathub.aim(self.robotDrive)))
+        #self.driverController.x().onTrue(cmd.runOnce(lambda: self.aimathub.aim(self.robotDrive)))
 
         # Left stick button (L3) — rotate robot to face april tag
         self.driverController.leftStick().onTrue(RotateToObjectCommand(self.robotDrive, self.camera))

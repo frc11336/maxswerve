@@ -16,14 +16,14 @@ class ShooterCommands(commands2.Subsystem):
 
 
     def get_power(self, distance):
-        power = (0.00348612 * distance) + 0.328365
+        power = (0.00201757 * distance) + .43013
         return (power)
     
     def fire(self, distance, poweroffset):
-        speed = self.get_power(distance) + poweroffset
-        self.shooter.Shooter_set_speed(speed)
+        speed = self.get_power(distance)
+        self.shooter.Shooter_set_speed(speed + poweroffset)
         time.sleep(1)
-        self.shooter.Feeder_set_speed(.9)
+        self.shooter.Feeder_set_speed(.5)
     
     def fire_Power(self, Power):
         print ("activating")

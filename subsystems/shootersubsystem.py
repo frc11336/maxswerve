@@ -34,7 +34,7 @@ class ShooterSubsystem(commands2.Subsystem):
     def Feeder_set_speed(self, speed):
         self.feeder.set(-speed)
         self.intakeon = speed != 0
-        wpilib.SmartDashboard.putBoolean("Intake On", self.intakeon)
+        wpilib.SmartDashboard.putBoolean("Intake On", self.feederon)
 
     def Feeder_stop(self):
         self.Feeder_set_speed(0)
